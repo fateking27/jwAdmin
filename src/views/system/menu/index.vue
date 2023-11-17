@@ -1,0 +1,260 @@
+<template>
+  <div class="main">
+    <el-form
+      ref="searchFormRef"
+      :inline="true"
+      :model="form"
+      class="bg-bg_color w-[99/100] pl-8 pt-4"
+    >
+      <el-form-item label="菜单名称" prop="menuName">
+        <el-input
+          v-model="form.menuName"
+          placeholder="请输入菜单名称"
+          clearable
+          @keyup.enter="onSearch"
+        />
+      </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-select
+          v-model="form.status"
+          placeholder="请选择菜单状态"
+          clearable
+          @change="onSearch"
+        >
+          <el-option
+            v-for="dict of sys_normal_disable"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-button
+          type="primary"
+          :icon="useRenderIcon(Search)"
+          :loading="loading"
+          @click="onSearch"
+        >
+          搜索
+        </el-button>
+        <el-button
+          :icon="useRenderIcon(Refresh)"
+          @click="resetForm(searchFormRef)"
+        >
+          重置
+        </el-button>
+      </el-form-item>
+    </el-form>
+
+    <PureTableBar
+      title="菜单列表"
+      :tableRef="tableRef?.getTableRef()"
+      :columns="columns"
+      @refresh="onSearch"
+    >
+      <template #buttons>
+        <el-button
+          type="primary"
+          :icon="useRenderIcon(AddFill)"
+          @click="handleAdd(null)"
+          v-if="hasAuth(['system:menu:add'])"
+        >
+          新增菜单
+        </el-button>
+      </template>
+      <template v-slot="{ size, dynamicColumns }">
+        <pure-table
+          ref="tableRef"
+          border
+          align-whole="center"
+          showOverflowTooltip
+          :loading="loading"
+          :size="size"
+          :data="dataList"
+          :columns="dynamicColumns"
+          :header-cell-style="{
+            background: 'var(--el-table-row-hover-bg-color)',
+            color: 'var(--el-text-color-primary)'
+          }"
+          row-key="menuId"
+          adaptive
+        >
+          <template #icon="{ row }">
+            <div class="flex-c">
+              <IconifyIconOffline :icon="row.icon" width="18" />
+            </div>
+          </template>
+          <template #status="{ row }">
+            <DictTag :options="sys_normal_disable" :value="row.status" />
+          </template>
+          <template #operation="{ row }">
+            <el-button
+              class="reset-margin"
+              link
+              type="primary"
+              :size="size"
+              @click="handleUpdate(row)"
+              :icon="useRenderIcon(EditPen)"
+              v-if="hasAuth(['system:menu:edit'])"
+            >
+              修改
+            </el-button>
+            <el-button
+              class="reset-margin"
+              link
+              type="primary"
+              :size="size"
+              @click="handleAdd(row)"
+              :icon="useRenderIcon(AddFill)"
+              v-if="hasAuth(['system:menu:add'])"
+            >
+              新增
+            </el-button>
+            <el-popconfirm
+              title="是否确认删除?"
+              v-if="hasAuth(['system:menu:remove'])"
+              @confirm="handleDelete(row)"
+            >
+              <template #reference>
+                <el-button
+                  class="reset-margin"
+                  link
+                  type="primary"
+                  :size="size"
+                  :icon="useRenderIcon(Delete)"
+                >
+                  删除
+                </el-button>
+              </template>
+            </el-popconfirm>
+          </template>
+        </pure-table>
+      </template>
+    </PureTableBar>
+    <Form ref="formRef" @reload="onSearch" />
+  </div>
+</template>
+<script setup lang="tsx">
+import { reactive, ref, onMounted } from "vue";
+import { PureTableBar } from "@/components/RePureTableBar";
+import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import dayjs from "dayjs";
+import { listMenu, delMenu } from "@/api/system/menu";
+import { handleTree } from "@/utils/tree";
+import { hasAuth } from "@/router/utils";
+import { message } from "@/utils/message";
+import { useDict } from "@/utils/useDict";
+import Form from "./form.vue";
+
+import Delete from "@iconify-icons/ep/delete";
+import EditPen from "@iconify-icons/ep/edit-pen";
+import Search from "@iconify-icons/ep/search";
+import Refresh from "@iconify-icons/ep/refresh";
+import AddFill from "@iconify-icons/ri/add-circle-line";
+
+defineOptions({
+  // eslint-disable-next-line vue/no-reserved-component-names
+  name: "Menu"
+});
+
+const { sys_normal_disable } = useDict("sys_normal_disable");
+
+const form = reactive({
+  menuName: "",
+  status: ""
+});
+
+const tableRef = ref();
+const searchFormRef = ref();
+const formRef = ref();
+const dataList = ref([]);
+const loading = ref(true);
+
+const columns: TableColumnList = [
+  {
+    label: "菜单名称",
+    prop: "menuName",
+    align: "left",
+    minWidth: 160
+  },
+  {
+    label: "图标",
+    prop: "icon",
+    width: 60,
+    slot: "icon"
+  },
+  {
+    label: "排序",
+    prop: "orderNum",
+    width: 60
+  },
+  {
+    label: "权限标识",
+    prop: "perms",
+    align: "left"
+  },
+  {
+    label: "组件路径",
+    prop: "component",
+    align: "left"
+  },
+  {
+    label: "状态",
+    prop: "status",
+    width: 80,
+    slot: "status"
+  },
+  {
+    label: "创建时间",
+    width: 180,
+    prop: "createTime",
+    formatter: ({ createTime }) =>
+      dayjs(createTime).format("YYYY-MM-DD HH:mm:ss")
+  },
+  {
+    label: "操作",
+    fixed: "right",
+    width: 210,
+    slot: "operation"
+  }
+];
+
+const handleAdd = row => {
+  formRef.value.isUpdate = false;
+  formRef.value.setData(row);
+  formRef.value.showDrawer = true;
+};
+
+const handleUpdate = row => {
+  formRef.value.isUpdate = true;
+  formRef.value.setData(row);
+  formRef.value.showDrawer = true;
+};
+
+const handleDelete = row => {
+  delMenu(row.menuId).then(() => {
+    message("删除成功", {
+      type: "success"
+    });
+    onSearch();
+  });
+};
+
+const onSearch = async () => {
+  loading.value = true;
+  const { data } = await listMenu(form);
+  dataList.value = handleTree(data, "menuId");
+  loading.value = false;
+};
+
+const resetForm = formEl => {
+  if (!formEl) return;
+  formEl.resetFields();
+  onSearch();
+};
+
+onMounted(() => {
+  onSearch();
+});
+</script>
