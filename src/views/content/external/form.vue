@@ -20,7 +20,7 @@
       </el-form-item>
 
       <el-form-item label="缩略图" prop="url">
-        <el-input v-model="form.url" placeholder="请输入链接" maxlength="200" />
+        <el-input v-model="form.url" placeholder="请输入链接" />
       </el-form-item>
 
       <el-form-item label="作者" prop="author">
