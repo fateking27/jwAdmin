@@ -7,20 +7,20 @@
     size="520px"
   >
     <el-form label-width="110px" ref="externalRef" :rules="rules" :model="form">
-      <el-form-item label="文章标题" prop="title">
+      <el-form-item label="图层名称" prop="title">
         <el-input
           v-model="form.title"
-          placeholder="请输入文章标题"
+          placeholder="请输入图层名称"
           maxlength="20"
         />
       </el-form-item>
 
-      <el-form-item label="类别" prop="type">
-        <el-input v-model="form.type" placeholder="请输入类别" maxlength="10" />
+      <el-form-item label="投影类型" prop="type">
+        <el-input v-model="form.type" placeholder="请输入类型" maxlength="10" />
       </el-form-item>
 
-      <el-form-item label="链接" prop="url">
-        <el-input v-model="form.url" placeholder="请输入链接" maxlength="20" />
+      <el-form-item label="缩略图" prop="url">
+        <el-input v-model="form.url" placeholder="请输入链接" maxlength="200" />
       </el-form-item>
 
       <el-form-item label="作者" prop="author">
@@ -41,10 +41,10 @@
         />
       </el-form-item>
 
-      <el-form-item label="文章内容" prop="content">
+      <el-form-item label="服务地址" prop="content">
         <el-input
           v-model="form.content"
-          placeholder="请输入文章内容"
+          placeholder="请输入服务地址"
           type="textarea"
         />
       </el-form-item>
@@ -83,7 +83,7 @@ const showDrawer = ref(false);
 const data = reactive({
   form: {} as any,
   rules: {
-    title: [{ required: true, message: "文章标题不能为空", trigger: "blur" }],
+    title: [{ required: true, message: "图层名称不能为空", trigger: "blur" }],
     content: [{ required: true, message: "内容不能为空", trigger: "blur" }]
   }
 });

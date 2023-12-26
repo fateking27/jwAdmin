@@ -6,10 +6,10 @@
       :model="form"
       class="bg-bg_color w-[99/100] pl-8 pt-4"
     >
-      <el-form-item label="文章标题" prop="title">
+      <el-form-item label="图层名称" prop="title">
         <el-input
           v-model="form.title"
-          placeholder="请输入文章标题"
+          placeholder="请输入图层名称"
           clearable
           @keyup.enter="onSearch"
         />
@@ -45,7 +45,7 @@
           @click="handleAdd"
           v-if="hasAuth(['system:dept:add'])"
         >
-          新增文章
+          新增地图服务
         </el-button>
 
         <el-button
@@ -205,13 +205,13 @@ const columns: TableColumnList = [
     reserveSelection: true
   },
   {
-    label: "文章标题",
+    label: "图层名称",
     prop: "title",
     align: "left",
     minWidth: 120
   },
   {
-    label: "类别",
+    label: "投影类型",
     prop: "type",
     width: 120
   },
@@ -221,8 +221,8 @@ const columns: TableColumnList = [
     width: 120
   },
   {
-    label: "链接",
-    prop: "url",
+    label: "服务地址",
+    prop: "content",
     width: 200
   },
   {
@@ -310,7 +310,7 @@ function handleDelete(row) {
 
 const newDelete = row => {
   const ids = row.id || Ids.value;
-  ElMessageBox.confirm("是否确认删除所选新闻数据项?", "系统提示", {
+  ElMessageBox.confirm("是否确认删除所选数据项?", "系统提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning"

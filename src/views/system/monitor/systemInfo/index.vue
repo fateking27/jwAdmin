@@ -153,8 +153,8 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .monitor-bg {
-  background: #fff;
   padding: 20px;
+  background: #fff;
 
   :deep(.el-descriptions__label.el-descriptions__cell.is-bordered-label) {
     width: 200px;
