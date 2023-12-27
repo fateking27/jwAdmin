@@ -106,6 +106,7 @@ async function onSearch() {
   loading.value = true;
   //获取所有栏目的文章
   const { rows } = await listBrowse(form);
+  // console.log(rows)
   dataList.value = rows;
   // renderChart();
   // renderPieChart();

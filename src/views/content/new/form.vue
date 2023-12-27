@@ -22,6 +22,23 @@
         />
       </el-form-item>
 
+      <!-- <el-form-item label="新闻封面" prop="brief">
+        <el-select v-model="value" placeholder="Select">
+          <el-option-group
+            v-for="group in options"
+            :key="group.label"
+            :label="group.label"
+          >
+            <el-option
+              v-for="item in group.options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-option-group>
+        </el-select>
+      </el-form-item> -->
+
       <el-form-item label="新闻类别" prop="type">
         <el-select
           v-model="form.type"

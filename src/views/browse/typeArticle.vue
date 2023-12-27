@@ -15,14 +15,14 @@
           range-separator="-"
           :start-placeholder="form.beginDay"
           :end-placeholder="form.endDay"
-          @change="onSearch"
+          @change="SearchData(dateRange)"
         />
       </el-form-item>
       <el-button
         type="primary"
         :icon="useRenderIcon(Search)"
         :loading="loading"
-        @click="onSearch"
+        @click="SearchData(dateRange)"
       >
         搜索
       </el-button>
@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { listBrowse } from "@/api/Browse/browse";
+import { listBrowse, listArticle } from "@/api/Browse/browse";
 import { onMounted, reactive, ref } from "vue";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
@@ -90,6 +90,8 @@ import { PaginationProps } from "@pureadmin/table";
 defineOptions({
   name: "TypeArticle"
 });
+
+const dateRange = ref();
 
 const tableRef = ref();
 const searchFormRef = ref();
@@ -157,16 +159,31 @@ function resetForm(formEl) {
 async function onSearch() {
   loading.value = true;
   //获取近一个月的新闻信息
-  const { rows } = await listBrowse(form);
+  const { rows } = await listArticle();
   dataList.value = rows;
   // renderChart();
   // renderPieChart();
   loading.value = false;
 }
 
+const SearchData = async (dateRange?) => {
+  loading.value = true;
+
+  console.log("beginDay:", dateRange[0], "endDay:", dateRange[1]);
+
+  const res = await listBrowse({
+    beginDay: dateRange[0],
+    endDay: dateRange[1]
+  });
+
+  dataList.value = res.rows;
+  loading.value = false;
+
+  console.log("rows", res);
+};
+
 //获取近一个月的新闻信息
 //获取近一个月所有文章信息
-
 onMounted(() => {
   form.endDay = dayjs().format("YYYY-MM-DD");
   form.beginDay = dayjs().subtract(1, "month").format("YYYY-MM-DD");
