@@ -207,7 +207,7 @@ const columns: TableColumnList = [
   {
     label: "图层名称",
     prop: "title",
-    align: "left",
+    // align: "left",
     minWidth: 120
   },
   {
