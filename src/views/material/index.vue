@@ -1,0 +1,248 @@
+<template>
+  <div class="main">
+    <el-form
+      ref="searchFormRef"
+      :inline="true"
+      :model="form"
+      class="bg-bg_color w-[99/100] pl-8 pt-4"
+    >
+      <el-form-item label="标题" prop="title">
+        <el-input
+          v-model="form.title"
+          placeholder="请输入标题"
+          clearable
+          @keyup.enter="onSearch"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button
+          type="primary"
+          :icon="useRenderIcon(Search)"
+          :loading="loading"
+          @click="onSearch"
+        >
+          搜索
+        </el-button>
+        <el-button
+          :icon="useRenderIcon(Refresh)"
+          @click="resetForm(searchFormRef)"
+        >
+          重置
+        </el-button>
+      </el-form-item>
+    </el-form>
+
+    <PureTableBar title="素材列表" :columns="columns" @refresh="onSearch">
+      <template #buttons>
+        <el-button
+          type="primary"
+          :icon="useRenderIcon(AddFill)"
+          @click="handleAdd"
+          v-if="hasAuth(['system:dept:add'])"
+        >
+          新增素材
+        </el-button>
+      </template>
+
+      <template v-slot="{ size, dynamicColumns }">
+        <pure-table
+          border
+          align-whole="center"
+          :loading="loading"
+          :size="size"
+          :data="dataList"
+          :columns="dynamicColumns"
+          :pagination="pagination"
+          :paginationSmall="size === 'small'"
+          :header-cell-style="{
+            background: 'var(--el-table-row-hover-bg-color)',
+            color: 'var(--el-text-color-primary)'
+          }"
+          row-key="id"
+          adaptive
+          @page-size-change="handleSizeChange"
+          @page-current-change="handleCurrentChange"
+        >
+          <template #operation="{ row }">
+            <el-button
+              class="reset-margin"
+              link
+              type="primary"
+              :size="size"
+              :icon="useRenderIcon(EditPen)"
+              @click="handleUpdate(row)"
+              v-if="hasAuth(['system:dept:edit'])"
+            >
+              修改
+            </el-button>
+            <el-button
+              class="reset-margin"
+              link
+              type="primary"
+              :size="size"
+              :icon="useRenderIcon(EditPen)"
+              @click="handleSee(row)"
+              v-if="hasAuth(['system:dept:edit'])"
+            >
+              查看
+            </el-button>
+            <el-popconfirm
+              title="是否确认删除?"
+              @confirm="handleDelete(row)"
+              v-if="hasAuth(['system:dept:remove'])"
+            >
+              <template #reference>
+                <el-button
+                  class="reset-margin"
+                  link
+                  type="primary"
+                  :size="size"
+                  :icon="useRenderIcon(Delete)"
+                >
+                  删除
+                </el-button>
+              </template>
+            </el-popconfirm>
+          </template>
+        </pure-table>
+      </template>
+    </PureTableBar>
+    <Form ref="formRef" @reload="onSearch" />
+    <Show ref="showRef" />
+  </div>
+</template>
+<script setup lang="ts">
+import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import { PureTableBar } from "@/components/RePureTableBar";
+import Search from "@iconify-icons/ep/search";
+import Refresh from "@iconify-icons/ep/refresh";
+
+import AddFill from "@iconify-icons/ri/add-circle-line";
+import { onMounted, reactive, ref } from "vue";
+import { hasAuth } from "@/router/utils";
+import { message } from "@/utils/message";
+import { removeMaterial, getMaterialPage } from "@/api/wjx/material";
+import { PaginationProps } from "@pureadmin/table";
+import Form from "./form.vue";
+import Show from "./show.vue";
+import { useRoute } from "vue-router";
+import { getFileInfo } from "@/api/wjx/file";
+
+const { VITE_API_PATH } = import.meta.env;
+const route = useRoute();
+
+const type = route.query.type;
+defineOptions({
+  name: "material"
+});
+
+const searchFormRef = ref();
+const tableRef = ref();
+const formRef = ref();
+
+const form = reactive({
+  title: "",
+  pageNum: 1,
+  pageSize: 10
+});
+const dataList = ref([]);
+const loading = ref(true);
+
+const columns: TableColumnList = [
+  {
+    label: "标题",
+    prop: "title",
+    align: "left",
+    width: 120
+  },
+  {
+    label: "作者",
+    prop: "author",
+    width: 300
+  },
+  {
+    label: "描述",
+    prop: "description",
+    minWidth: 300
+  },
+  {
+    label: "操作",
+    fixed: "right",
+    slot: "operation"
+  }
+];
+
+const handleAdd = row => {
+  formRef.value.isUpdate = false;
+  formRef.value.setData(undefined, type);
+  formRef.value.showDrawer = true;
+};
+
+const handleUpdate = row => {
+  formRef.value.isUpdate = true;
+  formRef.value.setData(row, type);
+  formRef.value.showDrawer = true;
+};
+const showRef = ref();
+const handleSee = async row => {
+  //先根据文件id查询文件详细信息
+  const res = await getFileInfo(row.fileId);
+  row.file = res.data;
+  row.file.url = `${VITE_API_PATH}/static/${res.data.staticPath}`;
+  await showRef.value.showMaterial(row);
+};
+
+function handleDelete(row) {
+  removeMaterial(row.id).then(() => {
+    message("删除成功", {
+      type: "success"
+    });
+    onSearch();
+  });
+}
+
+function resetForm(formEl) {
+  if (!formEl) return;
+  formEl.resetFields();
+  onSearch();
+}
+
+const onSearch = async () => {
+  const params = {
+    type: type,
+    title: form.title,
+    pageSize: pagination.pageSize,
+    pageNum: pagination.currentPage
+  };
+  loading.value = true;
+  const res = await getMaterialPage(params);
+  pagination.total = res.data.total;
+  dataList.value = res.data.rows;
+  loading.value = false;
+};
+
+const pagination = reactive<PaginationProps>({
+  total: 0,
+  pageSize: 10,
+  currentPage: 1,
+  background: true
+});
+
+const handleSizeChange = (val: number) => {
+  // console.log(`${val} items per page`);
+  pagination.pageSize = val;
+  form.pageSize = pagination.pageSize;
+  onSearch();
+};
+
+const handleCurrentChange = (val: number) => {
+  // console.log(`current page: ${val}`);
+  pagination.currentPage = val;
+  form.pageNum = pagination.currentPage;
+  onSearch();
+};
+
+onMounted(() => {
+  onSearch();
+});
+</script>

@@ -3,7 +3,7 @@
     v-model="showDrawer"
     :title="!isUpdate ? '新增新闻' : '编辑新闻'"
     :before-close="handleDrawerClose"
-    size="520px"
+    size="1020px"
   >
     <el-form label-width="110px" ref="newRef" :rules="rules" :model="form">
       <el-form-item label="新闻标题" prop="name">
@@ -59,18 +59,34 @@
         />
       </el-form-item>
 
-      <el-form-item label="新闻内容" prop="content">
-        <el-input
-          v-model="form.content"
-          placeholder="请输入新闻内容"
-          type="textarea"
+      <!--            <el-form-item label="新闻封面" prop="content">-->
+      <!--              <el-input-->
+      <!--                v-model="form.content"-->
+      <!--                placeholder="请输入新闻内容"-->
+      <!--                type="textarea"-->
+      <!--              />-->
+      <!--            </el-form-item>-->
+
+      <div style="border: 1px solid #ccc">
+        <Toolbar
+          style="border-bottom: 1px solid #ccc"
+          :editor="editorRef"
+          :defaultConfig="toolbarConfig"
+          :mode="mode"
         />
-      </el-form-item>
+        <Editor
+          style="height: 500px; overflow-y: hidden"
+          v-model="form.content"
+          :defaultConfig="editorConfig"
+          :mode="mode"
+          @onCreated="handleCreated"
+        />
+      </div>
 
       <el-form-item>
         <el-button type="primary" :loading="loading" @click="onSubmit(newRef)"
-          >提交</el-button
-        >
+          >提交
+        </el-button>
         <el-button @click="handleDrawerClose">取消</el-button>
       </el-form-item>
     </el-form>
@@ -79,16 +95,25 @@
 
 <script setup lang="ts">
 import { FormInstance } from "element-plus";
-import { ref, reactive, toRefs } from "vue";
+import { ref, reactive, toRefs, shallowRef } from "vue";
 import { message } from "@/utils/message";
-//import { handleTree } from "@pureadmin/utils";
-import { addNew, updateNew, getNew } from "@/api/content/new";
-//import { useDict } from "@/utils/useDict";
-//const { sys_normal_disable } = useDict("sys_normal_disable");
 
+import { addNew, updateNew, getNew } from "@/api/content/new";
+import "@wangeditor/editor/dist/css/style.css";
+import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
+import { cloneDeep } from "@pureadmin/utils";
+// 编辑器实例，必须用 shallowRef
+const editorRef = shallowRef();
+
+const toolbarConfig = {};
+const editorConfig = { placeholder: "请输入内容..." };
+const handleCreated = editor => {
+  editorRef.value = editor; // 记录 editor 实例，重要！
+};
+const mode = ref("default");
+const valueHtml = ref("<p>hello</p>");
 const newRef = ref();
 const loading = ref(false);
-//const deptOptions = ref([]);
 const showDrawer = ref(false);
 
 const data = reactive({
@@ -110,7 +135,7 @@ const reset = () => {
     type: undefined,
     mark: undefined,
     author: undefined,
-    content: undefined,
+    content: "",
     releaseTime: undefined,
     release_status: undefined
   };
@@ -173,12 +198,31 @@ const setData = async row => {
     isUpdate.value = false;
   } else {
     isUpdate.value = true;
-    const id = row.id;
-    getNew(id).then(response => {
-      form.value = response.data;
-    });
+    form.value = cloneDeep(row);
   }
 };
 
 defineExpose({ showDrawer, isUpdate, setData });
 </script>
+
+<style>
+/* #editor—wrapper { */
+
+/*  border: 1px solid #ccc; */
+
+/*  z-index: 100; !* 按需定义 *! */
+
+/* } */
+
+/* #toolbar-container { */
+
+/*  border-bottom: 1px solid #ccc; */
+
+/* } */
+
+/* #editor-container { */
+
+/*  height: 500px; */
+
+/* } */
+</style>

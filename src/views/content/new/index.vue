@@ -65,7 +65,7 @@
           @click="newDelete"
           v-if="hasAuth(['system:dept:remove'])"
         >
-          删除
+          批量删除
         </el-button>
       </template>
 

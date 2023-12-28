@@ -1,28 +1,35 @@
 {
-  "id": "2208059",
-  "name": "pure-admin",
+  "id": "4390629",
+  "name": "正创宣传门户项目",
   "font_family": "iconfont",
-  "css_prefix_text": "pure-iconfont-",
-  "description": "pure-admin-iconfont",
+  "css_prefix_text": "icon-",
+  "description": "正创宣传门户项目",
   "glyphs": [
     {
-      "icon_id": "20594647",
-      "name": "Tabs",
-      "font_class": "tabs",
-      "unicode": "e63e",
-      "unicode_decimal": 58942
+      "icon_id": "201560",
+      "name": "喇叭",
+      "font_class": "laba",
+      "unicode": "e600",
+      "unicode_decimal": 58880
     },
     {
-      "icon_id": "22129506",
-      "name": "PureLogo",
-      "font_class": "logo",
-      "unicode": "e620",
-      "unicode_decimal": 58912
+      "icon_id": "6151260",
+      "name": "pause circle",
+      "font_class": "pausecircle",
+      "unicode": "e80d",
+      "unicode_decimal": 59405
     },
     {
-      "icon_id": "7795615",
-      "name": "New",
-      "font_class": "new",
+      "icon_id": "6776437",
+      "name": "声音静音",
+      "font_class": "shengyinjingyin",
+      "unicode": "eca9",
+      "unicode_decimal": 60585
+    },
+    {
+      "icon_id": "14464866",
+      "name": "player-play-circle",
+      "font_class": "player-play-circle",
       "unicode": "e615",
       "unicode_decimal": 58901
     }

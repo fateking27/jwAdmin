@@ -56,7 +56,7 @@
           @click="newDelete"
           v-if="hasAuth(['system:dept:remove'])"
         >
-          删除
+          批量删除
         </el-button>
       </template>
       <template v-slot="{ size, dynamicColumns }">
@@ -129,7 +129,7 @@
                   :size="size"
                   :icon="useRenderIcon(Delete)"
                 >
-                  删除
+                  批量删除
                 </el-button>
               </template>
             </el-popconfirm>

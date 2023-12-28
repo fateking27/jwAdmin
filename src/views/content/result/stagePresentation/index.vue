@@ -56,7 +56,7 @@
           @click="newDelete"
           v-if="hasAuth(['system:dept:remove'])"
         >
-          删除
+          批量删除
         </el-button>
       </template>
       <template v-slot="{ size, dynamicColumns }">
@@ -211,8 +211,8 @@ const columns: TableColumnList = [
     minWidth: 120
   },
   {
-    label: "类别",
-    prop: "type",
+    label: "阶段名称",
+    prop: "stageName",
     width: 120
   },
   {

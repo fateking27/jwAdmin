@@ -66,12 +66,14 @@
     </el-tab-pane>
 
     <el-tab-pane label="图表" />
+    <div id="chart" style="width: 600px; height: 400px" />
+    <div id="pie-chart" style="width: 400px; height: 400px" />
   </el-tabs>
   <Form ref="formRef" @reload="onSearch" />
 </template>
 
 <script setup lang="ts">
-import { listBrowse } from "@/api/Browse/browse";
+import { listArticle, listBrowse } from "@/api/Browse/browse";
 import { onMounted, reactive, ref } from "vue";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
@@ -86,6 +88,7 @@ import { message } from "@/utils/message";
 import dayjs from "dayjs";
 import { ElMessageBox } from "element-plus";
 import { PaginationProps } from "@pureadmin/table";
+import * as echarts from "echarts";
 
 defineOptions({
   name: "TypeArticle"
@@ -96,13 +99,14 @@ const searchFormRef = ref();
 const formRef = ref();
 const Ids = ref([]);
 const multiple = ref(true);
+
 const form = reactive({
   articleType: [],
   title: [],
   orderByColumn: undefined,
   isAsc: undefined,
-  beginDay: "",
-  endDay: ""
+  beginDay: dayjs().subtract(1, "month").format("YYYY-MM-DD"),
+  endDay: dayjs().format("YYYY-MM-DD")
   // pageNum: pagination.currentPage,
   // pageSize: pagination.pageSize,
 });
@@ -115,6 +119,7 @@ const form = reactive({
 
 const dataList = ref([]);
 const loading = ref(true);
+const dateRange = ref();
 
 const columns: TableColumnList = [
   {
@@ -154,22 +159,99 @@ function resetForm(formEl) {
   onSearch();
 }
 
+function renderChart() {
+  // 获取后台数据，假设数据为articles
+  console.log(dataList.value);
+  const articles = [
+    { title: "文章1", views: 100 },
+    { title: "文章2", views: 200 },
+    { title: "文章3", views: 150 }
+    // ...
+  ];
+  // 获取文章标题和浏览量
+  const titles = dataList.value.map(item => item.title);
+  const views = dataList.value.map(item => item.viewCount);
+  // console.log(titles,views)
+  // const titles = articles.map((item) => item.title);
+  // const views =  articles.map((item) => item.views);
+  // 创建柱形图实例
+  const chart = echarts.init(document.getElementById("chart"));
+
+  // 配置柱形图的选项
+  const options = {
+    title: {
+      text: "文章浏览量统计"
+    },
+    xAxis: {
+      type: "category",
+      data: titles
+    },
+    yAxis: {
+      type: "value"
+    },
+    series: [
+      {
+        data: views,
+        type: "bar"
+      }
+    ]
+  };
+
+  // 使用配置项渲染柱形图
+  chart.setOption(options);
+}
+
+function renderPieChart() {
+  // 获取后台数据，假设数据为articles
+  const articles = [
+    { title: "文章1", views: 100 },
+    { title: "文章2", views: 200 },
+    { title: "文章3", views: 150 }
+    // ...
+  ];
+
+  // 创建饼状图实例
+  const pieChart = echarts.init(document.getElementById("pie-chart"));
+
+  // 配置饼状图的选项
+  const options = {
+    title: {
+      text: "文章浏览量占比"
+    },
+    series: [
+      {
+        name: "访问量",
+        type: "pie",
+        radius: "50%",
+        data: articles.map(article => ({
+          name: article.title,
+          value: article.views
+        }))
+      }
+    ]
+  };
+  // 使用配置项渲染饼状图
+  pieChart.setOption(options);
+}
+
 async function onSearch() {
   loading.value = true;
   //获取近一个月的新闻信息
-  const { rows } = await listBrowse(form);
+  console.log(form.endDay);
+  const { rows } = await listArticle(form);
   dataList.value = rows;
-  // renderChart();
-  // renderPieChart();
+  console.log(dataList.value);
   loading.value = false;
+  renderChart();
+  renderPieChart();
 }
 
 //获取近一个月的新闻信息
 //获取近一个月所有文章信息
 
 onMounted(() => {
-  form.endDay = dayjs().format("YYYY-MM-DD");
-  form.beginDay = dayjs().subtract(1, "month").format("YYYY-MM-DD");
+  // form.beginDay = dayjs().subtract(1, "month").format("YYYY-MM-DD");
+  // form.endDay = dayjs().format("YYYY-MM-DD")
   onSearch();
 });
 </script>

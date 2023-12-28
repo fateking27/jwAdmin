@@ -15,12 +15,15 @@
         />
       </el-form-item>
       <el-form-item label="文章栏目：" prop="type">
-        <el-input
+        <el-select
           v-model="form.type"
-          placeholder="请输入文章栏目"
-          clearable
-          @keyup.enter="onSearch"
-        />
+          placeholder="请选择文章类别"
+          size="default"
+        >
+          <el-option label="项目来源" value="项目来源" />
+          <el-option label="建设意义" value="建设意义" />
+          <el-option label="预期成果" value="预期成果" />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button
@@ -64,7 +67,7 @@
           @click="newDelete"
           v-if="hasAuth(['system:dept:remove'])"
         >
-          删除
+          批量删除
         </el-button>
       </template>
       <template v-slot="{ size, dynamicColumns }">

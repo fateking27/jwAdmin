@@ -30,6 +30,14 @@
         />
       </el-form-item>
 
+      <el-form-item label="阶段名称" prop="stageName">
+        <el-input
+          v-model="form.author"
+          placeholder="请输入阶段名称"
+          maxlength="10"
+        />
+      </el-form-item>
+
       <el-form-item label="发布时间" prop="releaseTime">
         <el-date-picker
           v-model="form.releaseTime"
@@ -77,7 +85,10 @@ const data = reactive({
   form: {} as any,
   rules: {
     title: [{ required: true, message: "标题不能为空", trigger: "blur" }],
-    content: [{ required: true, message: "内容不能为空", trigger: "blur" }]
+    content: [{ required: true, message: "内容不能为空", trigger: "blur" }],
+    stageName: [
+      { required: true, message: "阶段名称不能为空", trigger: "blur" }
+    ]
   }
 });
 

@@ -35,6 +35,8 @@
     "@pureadmin/utils": "^1.9.6",
     "@vueuse/core": "^10.2.0",
     "@vueuse/motion": "^2.0.0",
+    "@wangeditor/editor": "^5.1.23",
+    "@wangeditor/editor-for-vue": "^5.1.12",
     "animate.css": "^4.1.1",
     "axios": "^1.4.0",
     "dayjs": "^1.11.8",
@@ -50,7 +52,9 @@
     "qs": "^6.11.2",
     "responsive-storage": "^2.2.0",
     "sortablejs": "^1.15.0",
+    "video.js": "^8.6.1",
     "vue": "^3.3.4",
+    "vue-aplayer": "^1.6.1",
     "vue-cli": "^2.9.6",
     "vue-router": "^4.2.2",
     "vue-types": "^5.1.0"
