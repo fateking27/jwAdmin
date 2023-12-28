@@ -22,22 +22,30 @@
         />
       </el-form-item>
 
-      <!-- <el-form-item label="新闻封面" prop="brief">
-        <el-select v-model="value" placeholder="Select">
+      <el-form-item
+        style="display: none"
+        label="新闻封面Id"
+        prop="coverMaterialId"
+      >
+        <el-input v-model="form.coverMaterialId" placeholder="" />
+      </el-form-item>
+
+      <el-form-item label="新闻封面" prop="coverMaterialUrl">
+        <el-select v-model="form.coverMaterialUrl" placeholder="请选择新闻封面">
           <el-option-group
             v-for="group in options"
-            :key="group.label"
-            :label="group.label"
+            :key="group.name"
+            :label="group.name"
           >
             <el-option
-              v-for="item in group.options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
+              v-for="item in group.list"
+              :key="item.id"
+              :label="item.title"
+              :value="item.url"
             />
           </el-option-group>
         </el-select>
-      </el-form-item> -->
+      </el-form-item>
 
       <el-form-item label="新闻类别" prop="type">
         <el-select
@@ -100,7 +108,7 @@
         />
       </div>
 
-      <el-form-item>
+      <el-form-item style="margin-top: 20px; margin-left: -110px">
         <el-button type="primary" :loading="loading" @click="onSubmit(newRef)"
           >提交
         </el-button>
@@ -112,13 +120,23 @@
 
 <script setup lang="ts">
 import { FormInstance } from "element-plus";
-import { ref, reactive, toRefs, shallowRef } from "vue";
+import { ref, reactive, toRefs, shallowRef, onMounted } from "vue";
 import { message } from "@/utils/message";
 
-import { addNew, updateNew, getNew } from "@/api/content/new";
+import { addNew, updateNew, getNew, NewImg } from "@/api/content/new";
 import "@wangeditor/editor/dist/css/style.css";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import { cloneDeep } from "@pureadmin/utils";
+
+let options = [];
+
+//获取新闻封面图片
+const getNewImg = async () => {
+  const res = await NewImg();
+  console.log(res);
+  options = res.data;
+};
+
 // 编辑器实例，必须用 shallowRef
 const editorRef = shallowRef();
 
@@ -154,7 +172,9 @@ const reset = () => {
     author: undefined,
     content: "",
     releaseTime: undefined,
-    release_status: undefined
+    release_status: undefined,
+    coverMaterialId: "",
+    coverMaterialUrl: undefined
   };
   if (newRef.value?.resetFields) {
     newRef.value.resetFields();
@@ -218,6 +238,10 @@ const setData = async row => {
     form.value = cloneDeep(row);
   }
 };
+
+onMounted(() => {
+  getNewImg();
+});
 
 defineExpose({ showDrawer, isUpdate, setData });
 </script>
