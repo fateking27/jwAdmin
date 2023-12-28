@@ -43,7 +43,7 @@
     </el-form>
 
     <PureTableBar
-      name="新闻信息列表"
+      title="新闻信息列表"
       :tableRef="tableRef?.getTableRef()"
       :columns="columns"
       @refresh="onSearch"

@@ -7,7 +7,7 @@ export const addMaterial = (data?: object) => {
 };
 
 /**删除素材**/
-export const removeMaterial = (id?: string) => {
+export const removeMaterial = (id?: number) => {
   return http.request<Result>("delete", "/wjx/material", { params: { id } });
 };
 

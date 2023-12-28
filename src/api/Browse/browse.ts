@@ -15,9 +15,9 @@ export const newCount = (data?: object) => {
   });
 };
 
-/**获取所有文章**/
+/**查询筛选条件后的日浏览量数据**/
 export const listArticle = (data?: object) => {
-  return http.request<Result>("get", "/business/bro/all_day_view_count", {
+  return http.request<Result>("get", "/business/browse/list", {
     params: data
   });
 };

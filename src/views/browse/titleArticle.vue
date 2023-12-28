@@ -60,7 +60,7 @@
   <el-tabs type="border-card">
     <el-tab-pane label="表格">
       <PureTableBar
-        name="文章列表"
+        title="文章列表"
         :tableRef="tableRef?.getTableRef()"
         :columns="columns"
         @refresh="onSearch"

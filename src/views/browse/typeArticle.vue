@@ -66,6 +66,7 @@
     </el-tab-pane>
 
     <el-tab-pane label="图表" />
+    <div id="chart" ref="chart" style="width: 600px; height: 400px" />
   </el-tabs>
   <Form ref="formRef" @reload="onSearch" />
 </template>
@@ -188,5 +189,31 @@ onMounted(() => {
   form.endDay = dayjs().format("YYYY-MM-DD");
   form.beginDay = dayjs().subtract(1, "month").format("YYYY-MM-DD");
   onSearch();
+
+  // 创建柱形图
+  const chartDom = document.getElementById("chart");
+  const myChart = echarts.init(chartDom);
+  const option = {
+    tooltip: {
+      trigger: "axis",
+      axisPointer: {
+        type: "shadow"
+      }
+    },
+    xAxis: {
+      type: "category",
+      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    },
+    yAxis: {
+      type: "value"
+    },
+    series: [
+      {
+        data: [120, 200, 150, 80, 70, 110, 130],
+        type: "bar"
+      }
+    ]
+  };
+  myChart.setOption(option);
 });
 </script>

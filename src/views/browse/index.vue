@@ -1,79 +1,124 @@
 <template>
   <div class="main">
-    <el-tabs type="border-card" v-model="activeName" @tab-click="handleClick">
-      <el-tab-pane label="栏目" name="articleType">
-        <TypeArticle v-if="activeName == 'articleType'" ref="typeArTical" />
+    <el-form
+      ref="searchFormRef"
+      :inline="true"
+      :model="form"
+      class="bg-bg_color w-[99/100] pl-8 pt-4"
+    >
+      <el-form-item>
+        <el-form-item label="发布时间">
+          <el-date-picker
+            v-model="dateRange"
+            value-format="YYYY-MM-DD"
+            type="daterange"
+            range-separator="-"
+            :start-placeholder="form.beginDay"
+            :end-placeholder="form.endDay"
+            @change="SearchData(dateRange)"
+          />
+        </el-form-item>
+        <el-button
+          type="primary"
+          :icon="useRenderIcon(Search)"
+          :loading="loading"
+          @click="SearchData(dateRange)"
+        >
+          搜索
+        </el-button>
+        <el-button
+          :icon="useRenderIcon(Refresh)"
+          @click="resetForm(searchFormRef)"
+        >
+          重置
+        </el-button>
+      </el-form-item>
+    </el-form>
+
+    <el-tabs type="border-card">
+      <el-tab-pane label="表格">
+        <PureTableBar
+          title="文章列表"
+          :tableRef="tableRef?.getTableRef()"
+          :columns="columns"
+          @refresh="SearchData(dateRange)"
+        >
+          <template v-slot="{ size, dynamicColumns }">
+            <pure-table
+              ref="tableRef"
+              border
+              align-whole="center"
+              showOverflowTooltip
+              default-expand-all
+              :loading="loading"
+              :size="size"
+              :data="dataList"
+              :columns="dynamicColumns"
+              :header-cell-style="{
+                background: 'var(--el-table-row-hover-bg-color)',
+                color: 'var(--el-text-color-primary)'
+              }"
+              row-key="id"
+              adaptive
+            />
+          </template>
+        </PureTableBar>
       </el-tab-pane>
-      <el-tab-pane label="文章标题" name="articleTitle">
-        <TitleArticle v-if="activeName == 'articleTitle'" ref="titleArticle" />
+
+      <el-tab-pane label="图表">
+        <div id="chart" ref="chart" style="width: 600px; height: 400px" />
       </el-tab-pane>
     </el-tabs>
+    <Form ref="formRef" @reload="onSearch" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { listBrowse, listArticle } from "@/api/Browse/browse";
 import { onMounted, reactive, ref } from "vue";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
-import Delete from "@iconify-icons/ep/delete";
-import EditPen from "@iconify-icons/ep/edit-pen";
 import Search from "@iconify-icons/ep/search";
 import Refresh from "@iconify-icons/ep/refresh";
-import Cancel from "@iconify-icons/ep/circle-close";
-import { useDict } from "@/utils/useDict";
-import { hasAuth } from "@/router/utils";
-import { message } from "@/utils/message";
+import * as echarts from "echarts";
 import dayjs from "dayjs";
-import { listBrowse } from "@/api/Browse/browse";
-import { PaginationProps } from "@pureadmin/table";
-import TypeArticle from "./typeArticle.vue";
-import TitleArticle from "./titleArticle.vue";
+import Tree from "./tree.vue";
 
 defineOptions({
-  name: "Browse",
-  components: {
-    TypeArticle,
-    TitleArticle
-  }
+  name: "TypeArticle"
 });
 
-const activeName = ref("articleType");
+const dateRange = ref();
 
 const tableRef = ref();
 const searchFormRef = ref();
 const formRef = ref();
 const Ids = ref([]);
 const multiple = ref(true);
-
-const pagination = reactive<PaginationProps>({
-  total: 0,
-  pageSize: 10,
-  currentPage: 1,
-  background: true
-});
-
 const form = reactive({
-  name: "",
-  type: "",
+  articleType: [],
+  title: [],
   orderByColumn: undefined,
   isAsc: undefined,
-  pageNum: pagination.currentPage,
-  pageSize: pagination.pageSize
+  beginDay: "",
+  endDay: ""
+  // pageNum: pagination.currentPage,
+  // pageSize: pagination.pageSize,
 });
+
+// const defaultDate = reactive( {
+//   endDay:"",
+//   beginDay:"",
+//   date:""
+// });
 
 const dataList = ref([]);
 const loading = ref(true);
 
 const columns: TableColumnList = [
   {
-    type: "selection",
-    width: 55,
-    align: "left",
-    reserveSelection: true
-  },
-  {
     label: "栏目类型",
-    prop: "articleTypeName",
+    prop: "articleType",
     width: 120
   },
   {
@@ -89,7 +134,6 @@ const columns: TableColumnList = [
     slot: "type"
   }
 ];
-
 const handleUpdate = row => {
   formRef.value.isUpdate = true;
   formRef.value.setData(row);
@@ -104,33 +148,143 @@ function resetForm(formEl) {
 
 async function onSearch() {
   loading.value = true;
-  //获取所有栏目的文章
-  const { rows } = await listBrowse(form);
-  // console.log(rows)
-  dataList.value = rows;
+  //获取近一个月的新闻信息
+  const { rows } = await listArticle();
   // renderChart();
-  // renderPieChart();
+  dataList.value = rows;
   loading.value = false;
 }
 
-//获取近一个月的新闻信息
-//获取近一个月所有文章信息
-
-const handleClick = tab => {
-  activeName.value = tab.name;
-  setTimeout(() => {
-    onQuery();
-  }, 500);
-};
-
-const onQuery = () => {
-  const activeComponent = ref(activeName).value;
-  // this.$refs[activeComponent].onSearch();
+const SearchData = async (dateRange?) => {
+  loading.value = true;
+  console.log("beginDay:", dateRange[0], "endDay:", dateRange[1]);
+  const res = await listArticle({
+    beginDay: dateRange[0],
+    endDay: dateRange[1]
+  });
+  dataList.value = res.rows;
+  loading.value = false;
+  console.log("rows", res);
 };
 
 onMounted(() => {
-  // defaultDate.endDay = dayjs().format("YYYY-MM-DD");
-  // defaultDate.beginDay = dayjs().subtract(1, "month").format("YYYY-MM-DD");
+  form.endDay = dayjs().format("YYYY-MM-DD");
+  form.beginDay = dayjs().subtract(1, "month").format("YYYY-MM-DD");
+
+  // 创建柱形图
+  const chartDom = document.getElementById("chart");
+  const myChart = echarts.init(chartDom);
+  // let option: EChartsOption;
+
+  interface DataItem {
+    value: number;
+    groupId: string;
+  }
+  const option = {
+    xAxis: {
+      data: ["Animals", "Fruits", "Cars"]
+    },
+    yAxis: {},
+    dataGroupId: "",
+    animationDurationUpdate: 500,
+    series: {
+      type: "bar",
+      id: "sales",
+      data: [
+        {
+          value: 5,
+          groupId: "animals"
+        },
+        {
+          value: 2,
+          groupId: "fruits"
+        },
+        {
+          value: 4,
+          groupId: "cars"
+        }
+      ] as DataItem[],
+      universalTransition: {
+        enabled: true,
+        divideShape: "clone"
+      }
+    }
+  };
+
+  const drilldownData = [
+    {
+      dataGroupId: "animals",
+      data: [
+        ["Cats", 4],
+        ["Dogs", 2],
+        ["Cows", 1],
+        ["Sheep", 2],
+        ["Pigs", 1]
+      ]
+    },
+    {
+      dataGroupId: "fruits",
+      data: [
+        ["Apples", 4],
+        ["Oranges", 2]
+      ]
+    },
+    {
+      dataGroupId: "cars",
+      data: [
+        ["Toyota", 4],
+        ["Opel", 2],
+        ["Volkswagen", 2]
+      ]
+    }
+  ];
+
+  myChart.on("click", function (event) {
+    if (event.data) {
+      const subData = drilldownData.find(function (data) {
+        return data.dataGroupId === (event.data as DataItem).groupId;
+      });
+      if (!subData) {
+        return;
+      }
+      myChart.setOption<echarts.EChartsOption>({
+        xAxis: {
+          data: subData.data.map(function (item) {
+            return item[0];
+          })
+        },
+        series: {
+          type: "bar",
+          id: "sales",
+          dataGroupId: subData.dataGroupId,
+          data: subData.data.map(function (item) {
+            return item[1];
+          }),
+          universalTransition: {
+            enabled: true,
+            divideShape: "clone"
+          }
+        },
+        graphic: [
+          {
+            type: "text",
+            left: 50,
+            top: 20,
+            style: {
+              text: "Back",
+              fontSize: 18
+            },
+            onclick: function () {
+              myChart.setOption(option);
+            }
+          }
+        ]
+      });
+    }
+  });
+
+  option && myChart.setOption(option);
+
   onSearch();
 });
 </script>

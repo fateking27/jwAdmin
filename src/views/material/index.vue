@@ -183,6 +183,7 @@ const handleUpdate = row => {
   formRef.value.setData(row, type);
   formRef.value.showDrawer = true;
 };
+
 const showRef = ref();
 const handleSee = async row => {
   //先根据文件id查询文件详细信息
@@ -207,20 +208,6 @@ function resetForm(formEl) {
   onSearch();
 }
 
-const onSearch = async () => {
-  const params = {
-    type: type,
-    title: form.title,
-    pageSize: pagination.pageSize,
-    pageNum: pagination.currentPage
-  };
-  loading.value = true;
-  const res = await getMaterialPage(params);
-  pagination.total = res.data.total;
-  dataList.value = res.data.rows;
-  loading.value = false;
-};
-
 const pagination = reactive<PaginationProps>({
   total: 0,
   pageSize: 10,
@@ -240,6 +227,20 @@ const handleCurrentChange = (val: number) => {
   pagination.currentPage = val;
   form.pageNum = pagination.currentPage;
   onSearch();
+};
+
+const onSearch = async () => {
+  const params = {
+    type: type,
+    title: form.title,
+    pageSize: pagination.pageSize,
+    pageNum: pagination.currentPage
+  };
+  loading.value = true;
+  const res = await getMaterialPage(params);
+  pagination.total = res.data.total;
+  dataList.value = res.data.rows;
+  loading.value = false;
 };
 
 onMounted(() => {
