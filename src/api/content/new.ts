@@ -8,6 +8,13 @@ export const listNew = (data?: object) => {
   });
 };
 
+/**查询新闻封面**/
+export const NewImg = (data?: object) => {
+  return http.request<Result>("get", "/wjx/material/tree", {
+    params: data
+  });
+};
+
 /**id查询新闻标题**/
 export const getNew = id => {
   return http.request<Result>("get", `/business/news_info/${id}`);
