@@ -49,16 +49,16 @@
               border
               align-whole="center"
               showOverflowTooltip
-              default-expand-all
+              :default-expand-all="true"
               :loading="loading"
               :size="size"
-              :data="dataList"
+              :data="listArticleData.handlerList"
               :columns="dynamicColumns"
               :header-cell-style="{
                 background: 'var(--el-table-row-hover-bg-color)',
                 color: 'var(--el-text-color-primary)'
               }"
-              row-key="id"
+              row-key="TypeId"
               adaptive
             />
           </template>
@@ -78,6 +78,7 @@ import { listBrowse, listArticle } from "@/api/Browse/browse";
 import { onMounted, reactive, ref } from "vue";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import { message } from "@/utils/message";
 import Search from "@iconify-icons/ep/search";
 import Refresh from "@iconify-icons/ep/refresh";
 import * as echarts from "echarts";
@@ -146,6 +147,62 @@ function resetForm(formEl) {
   onSearch();
 }
 
+//按类型分组后的数据
+const listArticleData = reactive({
+  handlerList: []
+});
+
+// 相同类型数据整合
+const handlerDatas = arr => {
+  const obj = {};
+  arr.forEach((item, index) => {
+    const { articleType } = item; //解构赋值
+
+    if (!obj[articleType]) {
+      obj[articleType] = {
+        articleType,
+        children: []
+      };
+    }
+    obj[articleType].children.push(item);
+  });
+  listArticleData.handlerList = Object.values(obj);
+
+  //给分组后的数据添加而外属性
+  listArticleData.handlerList = listArticleData.handlerList.map(
+    (item, index) => {
+      let sum = 0;
+      item.children.forEach(item => {
+        item.articleType =
+          item.articleType == "0"
+            ? ""
+            : item.articleType == "1"
+            ? ""
+            : item.articleType == "2"
+            ? ""
+            : "";
+        sum += item.viewCount;
+      }); //计算总浏览量
+
+      return {
+        ...item,
+        TypeId: index + 1,
+        viewCount: "总浏览数 " + sum,
+        title: ". . .",
+        articleType:
+          item.articleType == "0"
+            ? "自然"
+            : item.articleType == "1"
+            ? "海洋"
+            : item.articleType == "2"
+            ? "电力"
+            : "未分类"
+      };
+    }
+  );
+  console.log(listArticleData.handlerList);
+};
+
 async function onSearch() {
   loading.value = true;
   //获取近一个月的新闻信息
@@ -153,9 +210,17 @@ async function onSearch() {
   // renderChart();
   dataList.value = rows;
   loading.value = false;
+  console.log(rows);
+  handlerDatas(dataList.value); //调用数据分组方法
 }
 
 const SearchData = async (dateRange?) => {
+  if (!dateRange) {
+    message("请选择时间范围", {
+      type: "warning"
+    });
+    return;
+  }
   loading.value = true;
   console.log("beginDay:", dateRange[0], "endDay:", dateRange[1]);
   const res = await listArticle({
@@ -164,7 +229,7 @@ const SearchData = async (dateRange?) => {
   });
   dataList.value = res.rows;
   loading.value = false;
-  console.log("rows", res);
+  // console.log("rows", res);
 };
 
 onMounted(() => {

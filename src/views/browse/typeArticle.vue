@@ -168,10 +168,14 @@ async function onSearch() {
 }
 
 const SearchData = async (dateRange?) => {
+  if (!dateRange) {
+    message("请选择时间范围", {
+      type: "warning"
+    });
+    return;
+  }
   loading.value = true;
-
   console.log("beginDay:", dateRange[0], "endDay:", dateRange[1]);
-
   const res = await listBrowse({
     beginDay: dateRange[0],
     endDay: dateRange[1]
