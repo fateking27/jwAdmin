@@ -20,3 +20,8 @@ export const updateMaterial = (data?: object) => {
 export const getMaterialPage = (data?: object) => {
   return http.request<Result>("get", "/wjx/material/page", { params: data });
 };
+
+/**分组获取素材列表(图片和视频)**/
+export const getMaterialTree = () => {
+  return http.request<Result>("get", "/wjx/material/tree2");
+};

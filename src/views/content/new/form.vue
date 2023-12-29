@@ -88,31 +88,9 @@
           :picker-options="pickerOptions"
         />
       </el-form-item>
-
-      <!--            <el-form-item label="新闻封面" prop="content">-->
-      <!--              <el-input-->
-      <!--                v-model="form.content"-->
-      <!--                placeholder="请输入新闻内容"-->
-      <!--                type="textarea"-->
-      <!--              />-->
-      <!--            </el-form-item>-->
-
-      <div style="border: 1px solid #ccc">
-        <Toolbar
-          style="border-bottom: 1px solid #ccc"
-          :editor="editorRef"
-          :defaultConfig="toolbarConfig"
-          :mode="mode"
-        />
-        <Editor
-          style="height: 500px; overflow-y: hidden"
-          v-model="form.content"
-          :defaultConfig="editorConfig"
-          :mode="mode"
-          @onCreated="handleCreated"
-        />
-      </div>
-
+      <el-form-item label="内容" prop="content">
+        <SuperEditor v-model:model-value="form.content" />
+      </el-form-item>
       <el-form-item style="margin-top: 20px; margin-left: -110px">
         <el-button type="primary" :loading="loading" @click="onSubmit(newRef)"
           >提交
@@ -129,10 +107,8 @@ import { ref, reactive, toRefs, shallowRef, onMounted } from "vue";
 import { message } from "@/utils/message";
 
 import { addNew, updateNew, getNew, NewImg } from "@/api/content/new";
-import "@wangeditor/editor/dist/css/style.css";
-import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import { cloneDeep } from "@pureadmin/utils";
-
+import SuperEditor from "@/components/SuperEditor/index.vue";
 let options = [];
 
 //获取新闻封面图片
@@ -142,16 +118,7 @@ const getNewImg = async () => {
   options = res.data;
 };
 
-// 编辑器实例，必须用 shallowRef
-const editorRef = shallowRef();
-
-const toolbarConfig = {};
-const editorConfig = { placeholder: "请输入内容..." };
-const handleCreated = editor => {
-  editorRef.value = editor; // 记录 editor 实例，重要！
-};
 const mode = ref("default");
-const valueHtml = ref("<p>hello</p>");
 const newRef = ref();
 const loading = ref(false);
 const showDrawer = ref(false);
