@@ -49,16 +49,16 @@
               border
               align-whole="center"
               showOverflowTooltip
-              default-expand-all
+              :default-expand-all="true"
               :loading="loading"
               :size="size"
-              :data="dataList"
+              :data="listArticleData.handlerList"
               :columns="dynamicColumns"
               :header-cell-style="{
                 background: 'var(--el-table-row-hover-bg-color)',
                 color: 'var(--el-text-color-primary)'
               }"
-              row-key="id"
+              row-key="TypeId"
               adaptive
             />
           </template>
@@ -67,14 +67,9 @@
 
       <el-tab-pane label="图表">
         <div id="chart" ref="chart" style="width: 600px; height: 400px" />
-        <div
-          id="titleChart"
-          ref="titleChart"
-          style="width: 600px; height: 400px"
-        />
       </el-tab-pane>
     </el-tabs>
-    <Form ref="formRef" @reload="SearchData(dateRange)" />
+    <Form ref="formRef" @reload="onSearch" />
   </div>
 </template>
 
@@ -83,6 +78,7 @@ import { listBrowse, listArticle } from "@/api/Browse/browse";
 import { onMounted, reactive, ref } from "vue";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import { message } from "@/utils/message";
 import Search from "@iconify-icons/ep/search";
 import Refresh from "@iconify-icons/ep/refresh";
 import * as echarts from "echarts";
@@ -94,8 +90,7 @@ defineOptions({
 });
 
 const dateRange = ref();
-const progressNews = ref([]);
-const workNews = ref([]);
+
 const tableRef = ref();
 const searchFormRef = ref();
 const formRef = ref();
@@ -148,49 +143,103 @@ const handleUpdate = row => {
 
 function resetForm(formEl) {
   if (!formEl) return;
-  dateRange.value = [];
   formEl.resetFields();
-  SearchData(dateRange);
+  onSearch();
 }
 
-// async function onSearch() {
-//   loading.value = true;
-//   //获取近一个月的新闻信息
-//   const { rows } = await listArticle();
-//   // renderChart();
-//   dataList.value = rows;
-//   loading.value = false;
-// }
+//按类型分组后的数据
+const listArticleData = reactive({
+  handlerList: []
+});
+
+// 相同类型数据整合
+const handlerDatas = arr => {
+  const obj = {};
+  arr.forEach((item, index) => {
+    const { articleType } = item; //解构赋值
+
+    if (!obj[articleType]) {
+      obj[articleType] = {
+        articleType,
+        children: []
+      };
+    }
+    obj[articleType].children.push(item);
+  });
+  listArticleData.handlerList = Object.values(obj);
+
+  //给分组后的数据添加而外属性
+  listArticleData.handlerList = listArticleData.handlerList.map(
+    (item, index) => {
+      let sum = 0;
+      item.children.forEach(item => {
+        item.articleType =
+          item.articleType == "0"
+            ? ""
+            : item.articleType == "1"
+            ? ""
+            : item.articleType == "2"
+            ? ""
+            : "";
+        sum += item.viewCount;
+      }); //计算总浏览量
+
+      return {
+        ...item,
+        TypeId: index + 1,
+        viewCount: "总浏览数 " + sum,
+        title: ". . .",
+        articleType:
+          item.articleType == "0"
+            ? "自然"
+            : item.articleType == "1"
+            ? "海洋"
+            : item.articleType == "2"
+            ? "电力"
+            : "未分类"
+      };
+    }
+  );
+  console.log(listArticleData.handlerList);
+};
+
+async function onSearch() {
+  loading.value = true;
+  //获取近一个月的新闻信息
+  const { rows } = await listArticle();
+  // renderChart();
+  dataList.value = rows;
+  loading.value = false;
+  console.log(rows);
+  handlerDatas(dataList.value); //调用数据分组方法
+}
 
 const SearchData = async (dateRange?) => {
+  if (!dateRange) {
+    message("请选择时间范围", {
+      type: "warning"
+    });
+    return;
+  }
   loading.value = true;
-  // console.log("beginDay:", dateRange[0], "endDay:", dateRange[1]);
+  console.log("beginDay:", dateRange[0], "endDay:", dateRange[1]);
   const res = await listArticle({
     beginDay: dateRange[0],
     endDay: dateRange[1]
   });
   dataList.value = res.rows;
-  // workNews.value = classifyNews("0");
-  // progressNews.value = classifyNews("1");
-  console.log(dataList.value);
-  renderChart();
-  titleChart();
   loading.value = false;
   // console.log("rows", res);
 };
 
-// const classifyNews = newType => {
-//   return dataList.value.filter(news => news.articleType === newType);
-// };
+onMounted(() => {
+  form.endDay = dayjs().format("YYYY-MM-DD");
+  form.beginDay = dayjs().subtract(1, "month").format("YYYY-MM-DD");
 
-function renderChart() {
   // 创建柱形图
   const chartDom = document.getElementById("chart");
   const myChart = echarts.init(chartDom);
   // let option: EChartsOption;
-  // const titles = dataList.value.map(item => item.title);
-  // const views = dataList.value.map(item => item.viewCount);
-  // const articalType = dataList.value.map(item => item.arcticalType);
 
   interface DataItem {
     value: number;
@@ -298,81 +347,9 @@ function renderChart() {
       });
     }
   });
+
   option && myChart.setOption(option);
-}
 
-function titleChart() {
-  const chart = document.getElementById("titleChart");
-  const titleChart = echarts.init(chart);
-  console.log(dataList.value);
-  const options = {
-    title: {
-      text: "文章浏览量统计"
-    },
-    tooltip: {
-      trigger: "axis"
-    },
-    legend: {
-      data: ["Email", "Union Ads", "Video Ads", "Direct", "Search Engine"]
-    },
-    grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
-      containLabel: true
-    },
-    toolbox: {
-      feature: {
-        saveAsImage: {}
-      }
-    },
-    xAxis: {
-      type: "category",
-      boundaryGap: false,
-      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    },
-    yAxis: {
-      type: "value"
-    },
-    series: [
-      {
-        name: "Email",
-        type: "line",
-        stack: "Total",
-        data: [120, 132, 101, 134, 90, 230, 210]
-      },
-      {
-        name: "Union Ads",
-        type: "line",
-        stack: "Total",
-        data: [220, 182, 191, 234, 290, 330, 310]
-      },
-      {
-        name: "Video Ads",
-        type: "line",
-        stack: "Total",
-        data: [150, 232, 201, 154, 190, 330, 410]
-      },
-      {
-        name: "Direct",
-        type: "line",
-        stack: "Total",
-        data: [320, 332, 301, 334, 390, 330, 320]
-      },
-      {
-        name: "Search Engine",
-        type: "line",
-        stack: "Total",
-        data: [820, 932, 901, 934, 1290, 1330, 1320]
-      }
-    ]
-  };
-  options && titleChart.setOption(options);
-}
-
-onMounted(() => {
-  form.endDay = dayjs().format("YYYY-MM-DD");
-  form.beginDay = dayjs().subtract(1, "month").format("YYYY-MM-DD");
-  SearchData(dateRange);
+  onSearch();
 });
 </script>
