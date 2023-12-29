@@ -1,7 +1,7 @@
 <template>
   <el-drawer
     v-model="showDrawer"
-    :title="!isUpdate ? '新增成果内容' : '编辑成果内容'"
+    :title="!isUpdate ? '新增修复进度' : '编辑修复进度'"
     :before-close="handleDrawerClose"
     size="520px"
   >
@@ -66,7 +66,7 @@ import { FormInstance } from "element-plus";
 import { ref, reactive, toRefs } from "vue";
 import { message } from "@/utils/message";
 
-import { addResult, updateResult, getResult } from "@/api/content/result";
+import { addProgress, updateResult, getResult } from "@/api/content/result";
 
 const resultRef = ref();
 const loading = ref(false);
@@ -112,7 +112,7 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       if (!isUpdate.value) {
-        await addResult(form.value)
+        await addProgress(form.value)
           .then(() => {
             message("新增成功", {
               type: "success"

@@ -160,7 +160,7 @@ import { message } from "@/utils/message";
 import {
   delResult,
   getResult,
-  listResult,
+  listProgress,
   releaseResult,
   updateResult
 } from "@/api/content/result";
@@ -209,11 +209,6 @@ const columns: TableColumnList = [
     prop: "title",
     align: "left",
     minWidth: 120
-  },
-  {
-    label: "类别",
-    prop: "type",
-    width: 120
   },
   {
     label: "来源",
@@ -331,7 +326,7 @@ function resetForm(formEl) {
 
 async function onSearch() {
   loading.value = true;
-  const { rows } = await listResult(form);
+  const { rows } = await listProgress(form);
   dataList.value = rows;
   loading.value = false;
 }

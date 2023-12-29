@@ -10,7 +10,7 @@
         <el-input
           v-model="form.name"
           placeholder="请输入新闻名称"
-          maxlength="20"
+          maxlength="30"
         />
       </el-form-item>
 

@@ -67,9 +67,14 @@
 
       <el-tab-pane label="图表">
         <div id="chart" ref="chart" style="width: 600px; height: 400px" />
+        <div
+          id="titleChart"
+          ref="titleChart"
+          style="width: 600px; height: 400px"
+        />
       </el-tab-pane>
     </el-tabs>
-    <Form ref="formRef" @reload="onSearch" />
+    <Form ref="formRef" @reload="SearchData(dateRange)" />
   </div>
 </template>
 
@@ -89,7 +94,8 @@ defineOptions({
 });
 
 const dateRange = ref();
-
+const progressNews = ref([]);
+const workNews = ref([]);
 const tableRef = ref();
 const searchFormRef = ref();
 const formRef = ref();
@@ -142,39 +148,49 @@ const handleUpdate = row => {
 
 function resetForm(formEl) {
   if (!formEl) return;
+  dateRange.value = [];
   formEl.resetFields();
-  onSearch();
+  SearchData(dateRange);
 }
 
-async function onSearch() {
-  loading.value = true;
-  //获取近一个月的新闻信息
-  const { rows } = await listArticle();
-  // renderChart();
-  dataList.value = rows;
-  loading.value = false;
-}
+// async function onSearch() {
+//   loading.value = true;
+//   //获取近一个月的新闻信息
+//   const { rows } = await listArticle();
+//   // renderChart();
+//   dataList.value = rows;
+//   loading.value = false;
+// }
 
 const SearchData = async (dateRange?) => {
   loading.value = true;
-  console.log("beginDay:", dateRange[0], "endDay:", dateRange[1]);
+  // console.log("beginDay:", dateRange[0], "endDay:", dateRange[1]);
   const res = await listArticle({
     beginDay: dateRange[0],
     endDay: dateRange[1]
   });
   dataList.value = res.rows;
+  // workNews.value = classifyNews("0");
+  // progressNews.value = classifyNews("1");
+  console.log(dataList.value);
+  renderChart();
+  titleChart();
   loading.value = false;
-  console.log("rows", res);
+  // console.log("rows", res);
 };
 
-onMounted(() => {
-  form.endDay = dayjs().format("YYYY-MM-DD");
-  form.beginDay = dayjs().subtract(1, "month").format("YYYY-MM-DD");
+// const classifyNews = newType => {
+//   return dataList.value.filter(news => news.articleType === newType);
+// };
 
+function renderChart() {
   // 创建柱形图
   const chartDom = document.getElementById("chart");
   const myChart = echarts.init(chartDom);
   // let option: EChartsOption;
+  // const titles = dataList.value.map(item => item.title);
+  // const views = dataList.value.map(item => item.viewCount);
+  // const articalType = dataList.value.map(item => item.arcticalType);
 
   interface DataItem {
     value: number;
@@ -282,9 +298,81 @@ onMounted(() => {
       });
     }
   });
-
   option && myChart.setOption(option);
+}
 
-  onSearch();
+function titleChart() {
+  const chart = document.getElementById("titleChart");
+  const titleChart = echarts.init(chart);
+  console.log(dataList.value);
+  const options = {
+    title: {
+      text: "文章浏览量统计"
+    },
+    tooltip: {
+      trigger: "axis"
+    },
+    legend: {
+      data: ["Email", "Union Ads", "Video Ads", "Direct", "Search Engine"]
+    },
+    grid: {
+      left: "3%",
+      right: "4%",
+      bottom: "3%",
+      containLabel: true
+    },
+    toolbox: {
+      feature: {
+        saveAsImage: {}
+      }
+    },
+    xAxis: {
+      type: "category",
+      boundaryGap: false,
+      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    },
+    yAxis: {
+      type: "value"
+    },
+    series: [
+      {
+        name: "Email",
+        type: "line",
+        stack: "Total",
+        data: [120, 132, 101, 134, 90, 230, 210]
+      },
+      {
+        name: "Union Ads",
+        type: "line",
+        stack: "Total",
+        data: [220, 182, 191, 234, 290, 330, 310]
+      },
+      {
+        name: "Video Ads",
+        type: "line",
+        stack: "Total",
+        data: [150, 232, 201, 154, 190, 330, 410]
+      },
+      {
+        name: "Direct",
+        type: "line",
+        stack: "Total",
+        data: [320, 332, 301, 334, 390, 330, 320]
+      },
+      {
+        name: "Search Engine",
+        type: "line",
+        stack: "Total",
+        data: [820, 932, 901, 934, 1290, 1330, 1320]
+      }
+    ]
+  };
+  options && titleChart.setOption(options);
+}
+
+onMounted(() => {
+  form.endDay = dayjs().format("YYYY-MM-DD");
+  form.beginDay = dayjs().subtract(1, "month").format("YYYY-MM-DD");
+  SearchData(dateRange);
 });
 </script>

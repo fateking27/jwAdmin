@@ -6,10 +6,10 @@
       :model="form"
       class="bg-bg_color w-[99/100] pl-8 pt-4"
     >
-      <el-form-item label="文章标题" prop="title">
+      <el-form-item label="阶段标题" prop="title">
         <el-input
           v-model="form.title"
-          placeholder="请输入文章标题"
+          placeholder="请输入阶段标题"
           clearable
           @keyup.enter="onSearch"
         />
@@ -33,7 +33,7 @@
     </el-form>
 
     <PureTableBar
-      name="成果内容列表"
+      title="阶段成果列表"
       :tableRef="tableRef?.getTableRef()"
       :columns="columns"
       @refresh="onSearch"
@@ -45,7 +45,7 @@
           @click="handleAdd"
           v-if="hasAuth(['system:dept:add'])"
         >
-          新增成果
+          新增阶段
         </el-button>
 
         <el-button
@@ -83,28 +83,6 @@
         >
           <!--          <template #status="{ row }"></template>-->
           <template #operation="{ row }">
-            <el-button
-              class="reset-margin"
-              link
-              type="primary"
-              :size="size"
-              @click="handlePublish(row)"
-              :icon="useRenderIcon(Publish)"
-              v-if="hasAuth(['system:dept:add'])"
-            >
-              发布
-            </el-button>
-            <el-button
-              class="reset-margin"
-              link
-              type="primary"
-              :size="size"
-              @click="handleCancel(row)"
-              :icon="useRenderIcon(Cancel)"
-              v-if="hasAuth(['system:dept:add'])"
-            >
-              撤销
-            </el-button>
             <el-button
               class="reset-margin"
               link
@@ -157,13 +135,7 @@ import { useDict } from "@/utils/useDict";
 import Form from "./form.vue";
 import { hasAuth } from "@/router/utils";
 import { message } from "@/utils/message";
-import {
-  delResult,
-  getResult,
-  listResult,
-  releaseResult,
-  updateResult
-} from "@/api/content/result";
+import { delResult, listPage } from "@/api/content/result";
 import { PaginationProps } from "@pureadmin/table";
 import { ElMessageBox } from "element-plus";
 
@@ -245,26 +217,6 @@ const handleAdd = row => {
   formRef.value.showDrawer = true;
 };
 
-function handlePublish(row) {
-  row.release_status = 1;
-  releaseResult(row.id).then(() => {
-    message("发布成功", {
-      type: "success"
-    });
-    onSearch();
-  });
-}
-
-function handleCancel(row) {
-  row.release_status = 0;
-  releaseResult(row.id).then(() => {
-    message("撤回成功", {
-      type: "success"
-    });
-    onSearch();
-  });
-}
-
 const handleUpdate = row => {
   formRef.value.isUpdate = true;
   formRef.value.setData(row);
@@ -295,7 +247,7 @@ const handleSizeChange = (val: number) => {
 };
 
 function handleDelete(row) {
-  delResult(row.id).then(() => {
+  delPage(row.id).then(() => {
     message("删除成功", {
       type: "success"
     });
@@ -311,7 +263,7 @@ const newDelete = row => {
     type: "warning"
   })
     .then(() => {
-      return delResult(ids);
+      return delPage(ids);
     })
     .then(() => {
       message("删除成功", {
@@ -331,7 +283,7 @@ function resetForm(formEl) {
 
 async function onSearch() {
   loading.value = true;
-  const { rows } = await listResult(form);
+  const { rows } = await listPage(form);
   dataList.value = rows;
   loading.value = false;
 }

@@ -66,8 +66,7 @@ import { FormInstance } from "element-plus";
 import { ref, reactive, toRefs } from "vue";
 import { message } from "@/utils/message";
 
-import { addResult, updateResult, getResult } from "@/api/content/result";
-
+import { addCurrent, updateResult, getResult } from "@/api/content/result";
 const resultRef = ref();
 const loading = ref(false);
 //const deptOptions = ref([]);
@@ -112,7 +111,7 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       if (!isUpdate.value) {
-        await addResult(form.value)
+        await addCurrent(form.value)
           .then(() => {
             message("新增成功", {
               type: "success"
