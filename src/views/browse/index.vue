@@ -207,7 +207,7 @@ async function onSearch() {
   loading.value = true;
   //获取近一个月的新闻信息
   const { rows } = await listArticle();
-  // renderChart();
+  renderChart();
   dataList.value = rows;
   loading.value = false;
   console.log(rows);
@@ -232,10 +232,7 @@ const SearchData = async (dateRange?) => {
   // console.log("rows", res);
 };
 
-onMounted(() => {
-  form.endDay = dayjs().format("YYYY-MM-DD");
-  form.beginDay = dayjs().subtract(1, "month").format("YYYY-MM-DD");
-
+function renderChart() {
   // 创建柱形图
   const chartDom = document.getElementById("chart");
   const myChart = echarts.init(chartDom);
@@ -347,9 +344,12 @@ onMounted(() => {
       });
     }
   });
-
   option && myChart.setOption(option);
+}
 
+onMounted(() => {
+  form.endDay = dayjs().format("YYYY-MM-DD");
+  form.beginDay = dayjs().subtract(1, "month").format("YYYY-MM-DD");
   onSearch();
 });
 </script>
