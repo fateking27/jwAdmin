@@ -217,18 +217,6 @@ const handleFileUpload = param => {
     });
 };
 
-const typeName = computed(() => {
-  if (form.value.type == "0") {
-    return "图片";
-  } else if (form.value.type == "1") {
-    return "视频";
-  } else if (form.value.type == "2") {
-    return "音频";
-  } else {
-    return "";
-  }
-});
-
 // const imgUrl = ref("");
 const srcList = ref([]);
 

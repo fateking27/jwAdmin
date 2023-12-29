@@ -10,7 +10,7 @@
         <el-input
           v-model="form.name"
           placeholder="请输入新闻名称"
-          maxlength="20"
+          maxlength="30"
         />
       </el-form-item>
 
@@ -31,7 +31,12 @@
       </el-form-item>
 
       <el-form-item label="新闻封面" prop="coverMaterialUrl">
-        <el-select v-model="form.coverMaterialUrl" placeholder="请选择新闻封面">
+        <!-- 添加筛选 -->
+        <el-select
+          filterable
+          v-model="form.coverMaterialUrl"
+          placeholder="请选择新闻封面"
+        >
           <el-option-group
             v-for="group in options"
             :key="group.name"

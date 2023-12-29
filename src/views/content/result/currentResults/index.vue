@@ -160,8 +160,7 @@ import { hasAuth } from "@/router/utils";
 import { message } from "@/utils/message";
 import {
   delResult,
-  getResult,
-  listResult,
+  listCurrent,
   releaseResult,
   updateResult
 } from "@/api/content/result";
@@ -212,11 +211,6 @@ const columns: TableColumnList = [
     prop: "title",
     align: "left",
     minWidth: 120
-  },
-  {
-    label: "类别",
-    prop: "type",
-    width: 120
   },
   {
     label: "来源",
@@ -334,7 +328,7 @@ function resetForm(formEl) {
 
 async function onSearch() {
   loading.value = true;
-  const { rows } = await listResult(form);
+  const { rows } = await listCurrent(form);
   dataList.value = rows;
   loading.value = false;
 }

@@ -1,7 +1,7 @@
 <template>
   <el-drawer
     v-model="showDrawer"
-    :title="!isUpdate ? '新增成果内容' : '编辑成果内容'"
+    :title="!isUpdate ? '新增阶段内容' : '编辑阶段内容'"
     :before-close="handleDrawerClose"
     size="520px"
   >
@@ -32,7 +32,7 @@
 
       <el-form-item label="阶段名称" prop="stageName">
         <el-input
-          v-model="form.author"
+          v-model="form.stageName"
           placeholder="请输入阶段名称"
           maxlength="10"
         />
@@ -74,7 +74,7 @@ import { FormInstance } from "element-plus";
 import { ref, reactive, toRefs } from "vue";
 import { message } from "@/utils/message";
 
-import { addResult, updateResult, getResult } from "@/api/content/result";
+import { addPage, updateResult, getResult } from "@/api/content/result";
 
 const resultRef = ref();
 const loading = ref(false);
@@ -102,6 +102,7 @@ const reset = () => {
     author: undefined,
     content: undefined,
     source: undefined,
+    stageName: undefined,
     releaseTime: undefined,
     release_status: undefined
   };
@@ -123,7 +124,7 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       if (!isUpdate.value) {
-        await addResult(form.value)
+        await addPage(form.value)
           .then(() => {
             message("新增成功", {
               type: "success"
