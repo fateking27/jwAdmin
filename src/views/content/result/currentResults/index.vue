@@ -207,31 +207,24 @@ const columns: TableColumnList = [
     reserveSelection: true
   },
   {
-    label: "标题",
-    prop: "title",
-    align: "left",
+    label: "分级",
+    prop: "rank",
     minWidth: 120
   },
   {
-    label: "来源",
-    prop: "source",
-    width: 200
+    label: "功能",
+    prop: "disasterReduction",
+    minWidth: 120
   },
   {
-    label: "发布时间",
-    prop: "releaseTime",
-    width: 250,
-    slot: "type"
+    label: "现状",
+    prop: "ecologicalStatus",
+    minWidth: 120
   },
-  {
-    label: "作者",
-    prop: "author",
-    width: 120
-  },
+
   {
     label: "操作",
     fixed: "right",
-    width: 330,
     slot: "operation"
   }
 ];

@@ -6,48 +6,27 @@
     size="520px"
   >
     <el-form label-width="110px" ref="resultRef" :rules="rules" :model="form">
-      <el-form-item label="标题" prop="title">
+      <el-form-item label="分级" prop="rank">
         <el-input
-          v-model="form.title"
-          placeholder="请输入标题"
-          maxlength="20"
+          v-model="form.rank"
+          placeholder="请输入分级"
+          maxlength="120"
         />
       </el-form-item>
-
-      <el-form-item label="来源" prop="source">
+      <el-form-item label="功能" prop="disasterReduction">
         <el-input
-          v-model="form.source"
-          placeholder="请输入来源"
-          maxlength="50"
+          v-model="form.disasterReduction"
+          placeholder="请输入功能"
+          maxlength="120"
         />
       </el-form-item>
-
-      <el-form-item label="作者" prop="author">
+      <el-form-item label="现状" prop="ecologicalStatus">
         <el-input
-          v-model="form.author"
-          placeholder="请输入作者"
-          maxlength="10"
+          v-model="form.ecologicalStatus"
+          placeholder="请输入现状"
+          maxlength="120"
         />
       </el-form-item>
-
-      <el-form-item label="发布时间" prop="releaseTime">
-        <el-date-picker
-          v-model="form.releaseTime"
-          type="date"
-          placeholder="请选择发布时间"
-          value-format="YYYY-MM-DD"
-          :picker-options="pickerOptions"
-        />
-      </el-form-item>
-
-      <el-form-item label="内容" prop="content">
-        <el-input
-          v-model="form.content"
-          placeholder="请输入内容"
-          type="textarea"
-        />
-      </el-form-item>
-
       <el-form-item>
         <el-button
           type="primary"
@@ -75,8 +54,13 @@ const showDrawer = ref(false);
 const data = reactive({
   form: {} as any,
   rules: {
-    title: [{ required: true, message: "标题不能为空", trigger: "blur" }],
-    content: [{ required: true, message: "内容不能为空", trigger: "blur" }]
+    rank: [{ required: true, message: "分级不能为空", trigger: "blur" }],
+    disasterReduction: [
+      { required: true, message: "功能不能为空", trigger: "blur" }
+    ],
+    decologicalStatus: [
+      { required: true, message: "现状不能为空", trigger: "blur" }
+    ]
   }
 });
 
@@ -91,7 +75,10 @@ const reset = () => {
     content: undefined,
     source: undefined,
     releaseTime: undefined,
-    release_status: undefined
+    release_status: undefined,
+    ecologicalStatus: undefined,
+    disasterReduction: undefined,
+    rank: undefined
   };
   if (resultRef.value?.resetFields) {
     resultRef.value.resetFields();

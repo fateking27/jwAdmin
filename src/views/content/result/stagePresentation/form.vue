@@ -48,6 +48,16 @@
         />
       </el-form-item>
 
+      <el-form-item label="阶段时间" prop="stageTime">
+        <el-date-picker
+          v-model="form.stageTime"
+          type="monthrange"
+          range-separator="-"
+          value-format="YYYY-MM"
+          start-placeholder="Start month"
+          end-placeholder="End month"
+        />
+      </el-form-item>
       <el-form-item label="内容" prop="content">
         <el-input
           v-model="form.content"
@@ -104,7 +114,8 @@ const reset = () => {
     source: undefined,
     stageName: undefined,
     releaseTime: undefined,
-    release_status: undefined
+    release_status: undefined,
+    stageTime: undefined
   };
   if (resultRef.value?.resetFields) {
     resultRef.value.resetFields();
