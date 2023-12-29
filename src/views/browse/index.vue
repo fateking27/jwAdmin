@@ -136,7 +136,7 @@ const columns: TableColumnList = [
   {
     label: "总浏览次数",
     prop: "viewCount",
-    width: 120,
+    width: 160,
     slot: "type"
   }
 ];
@@ -192,15 +192,15 @@ const handlerDatas = arr => {
       return {
         ...item,
         TypeId: index + 1,
-        viewCount: "总浏览数 " + sum,
+        viewCount: "类型文章总浏览数 " + sum,
         title: ". . .",
         articleType:
           item.articleType == "0"
-            ? "自然"
+            ? "新闻信息"
             : item.articleType == "1"
-            ? "海洋"
+            ? "门户及项目介绍"
             : item.articleType == "2"
-            ? "电力"
+            ? "成果内容展示"
             : "未分类"
       };
     }
@@ -212,12 +212,13 @@ async function onSearch() {
   loading.value = true;
   //获取近一个月的新闻信息
   const { rows } = await listArticle();
-  renderChart();
-  titleChart();
+
   dataList.value = rows;
   loading.value = false;
   console.log(rows);
   handlerDatas(dataList.value); //调用数据分组方法
+  renderChart();
+  titleChart();
 }
 
 const SearchData = async (dateRange?) => {
@@ -234,8 +235,9 @@ const SearchData = async (dateRange?) => {
     endDay: dateRange[1]
   });
   dataList.value = res.rows;
+  handlerDatas(dataList.value); //调用数据分组方法
   loading.value = false;
-  // console.log("rows", res);
+  console.log("rows", res);
 };
 
 function renderChart() {
@@ -250,7 +252,7 @@ function renderChart() {
   }
   const option = {
     xAxis: {
-      data: ["Animals", "Fruits", "Cars"]
+      data: ["新闻信息", "门户及项目介绍", "成果内容展示"]
     },
     yAxis: {},
     dataGroupId: "",
@@ -268,7 +270,7 @@ function renderChart() {
           groupId: "fruits"
         },
         {
-          value: 4,
+          value: 1,
           groupId: "cars"
         }
       ] as DataItem[],
@@ -287,7 +289,7 @@ function renderChart() {
         ["Dogs", 2],
         ["Cows", 1],
         ["Sheep", 2],
-        ["Pigs", 1]
+        ["Pigs", 3]
       ]
     },
     {
@@ -306,6 +308,8 @@ function renderChart() {
       ]
     }
   ];
+
+  console.log(drilldownData);
 
   myChart.on("click", function (event) {
     if (event.data) {
