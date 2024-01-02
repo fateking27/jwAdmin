@@ -205,7 +205,7 @@ const handlerDatas = arr => {
       };
     }
   );
-  console.log(listArticleData.handlerList);
+  // console.log(listArticleData.handlerList);
 };
 
 async function onSearch() {
@@ -272,7 +272,23 @@ function renderChart() {
 
   const option = {
     xAxis: {
-      data: ["新闻信息", "门户及项目介绍", "成果内容展示"]
+      type: "category",
+      data: ["新闻信息", "门户及项目介绍", "成果内容展示"],
+      axisLabel: {
+        fontSize: 9,
+        interval: 0,
+        rotate: 30,
+        formatter: function () {
+          return "";
+        }
+      }
+    },
+    triggerEvent: true,
+    tooltip: {
+      trigger: "axis",
+      axisPointer: {
+        type: "shadow"
+      }
     },
     yAxis: {},
     dataGroupId: "",
