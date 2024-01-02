@@ -188,12 +188,17 @@ const columns: TableColumnList = [
     width: 120
   },
   {
+    label: "阶段时间",
+    prop: "stageTime",
+    width: 120
+  },
+  {
     label: "来源",
     prop: "source",
     width: 200
   },
   {
-    label: "发布时间",
+    label: "阶段时间",
     prop: "releaseTime",
     width: 250,
     slot: "type"
@@ -247,7 +252,7 @@ const handleSizeChange = (val: number) => {
 };
 
 function handleDelete(row) {
-  delPage(row.id).then(() => {
+  delResult(row.id).then(() => {
     message("删除成功", {
       type: "success"
     });
@@ -263,7 +268,7 @@ const newDelete = row => {
     type: "warning"
   })
     .then(() => {
-      return delPage(ids);
+      return delResult(ids);
     })
     .then(() => {
       message("删除成功", {

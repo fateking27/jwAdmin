@@ -91,6 +91,7 @@
               @click="handlePublish(row)"
               :icon="useRenderIcon(Publish)"
               v-if="hasAuth(['system:dept:add'])"
+              :disabled="row.releaseStatus == '1'"
             >
               发布
             </el-button>
@@ -102,6 +103,7 @@
               @click="handleCancel(row)"
               :icon="useRenderIcon(Cancel)"
               v-if="hasAuth(['system:dept:add'])"
+              :disabled="row.releaseStatus == '0'"
             >
               撤销
             </el-button>
