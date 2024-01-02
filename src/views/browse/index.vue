@@ -192,7 +192,7 @@ const handlerDatas = arr => {
       return {
         ...item,
         TypeId: index + 1,
-        viewCount: "类型文章总浏览数 " + sum,
+        viewCount: sum,
         title: ". . .",
         articleType:
           item.articleType == "0"
@@ -215,7 +215,7 @@ async function onSearch() {
 
   dataList.value = rows;
   loading.value = false;
-  console.log(rows);
+  // console.log(rows);
   handlerDatas(dataList.value); //调用数据分组方法
   renderChart();
   titleChart();
@@ -250,6 +250,26 @@ function renderChart() {
     value: number;
     groupId: string;
   }
+
+  //数据处理
+  const arr = listArticleData.handlerList.map(item => {
+    const data = item.children.map(({ title, viewCount }) => ({
+      title,
+      viewCount
+    }));
+    data.forEach((item, index) => (data[index] = Object.values(item)));
+    return {
+      ...item,
+      data: data,
+      dataGroupId: item.articleType,
+      value: item.viewCount,
+      groupId: item.articleType
+    };
+  });
+
+  const newData = arr.map(({ value, groupId }) => ({ value, groupId }));
+  console.log(newData);
+
   const option = {
     xAxis: {
       data: ["新闻信息", "门户及项目介绍", "成果内容展示"]
@@ -260,20 +280,7 @@ function renderChart() {
     series: {
       type: "bar",
       id: "sales",
-      data: [
-        {
-          value: 5,
-          groupId: "animals"
-        },
-        {
-          value: 2,
-          groupId: "fruits"
-        },
-        {
-          value: 1,
-          groupId: "cars"
-        }
-      ] as DataItem[],
+      data: newData as DataItem[],
       universalTransition: {
         enabled: true,
         divideShape: "clone"
@@ -281,35 +288,36 @@ function renderChart() {
     }
   };
 
-  const drilldownData = [
-    {
-      dataGroupId: "animals",
-      data: [
-        ["Cats", 4],
-        ["Dogs", 2],
-        ["Cows", 1],
-        ["Sheep", 2],
-        ["Pigs", 3]
-      ]
-    },
-    {
-      dataGroupId: "fruits",
-      data: [
-        ["Apples", 4],
-        ["Oranges", 2]
-      ]
-    },
-    {
-      dataGroupId: "cars",
-      data: [
-        ["Toyota", 4],
-        ["Opel", 2],
-        ["Volkswagen", 2]
-      ]
-    }
-  ];
+  // const drilldownData = [
+  //   {
+  //     dataGroupId: "animals",
+  //     data: [
+  //       ["Cats", 4],
+  //       ["Dogs", 2],
+  //       ["Cows", 1],
+  //       ["Sheep", 2],
+  //       ["Pigs", 3]
+  //     ]
+  //   },
+  //   {
+  //     dataGroupId: "fruits",
+  //     data: [
+  //       ["Apples", 4],
+  //       ["Oranges", 2]
+  //     ]
+  //   },
+  //   {
+  //     dataGroupId: "cars",
+  //     data: [
+  //       ["Toyota", 4],
+  //       ["Opel", 2],
+  //       ["Volkswagen", 2]
+  //     ]
+  //   }
+  // ];
 
-  console.log(drilldownData);
+  console.log(arr);
+  const drilldownData = arr;
 
   myChart.on("click", function (event) {
     if (event.data) {
