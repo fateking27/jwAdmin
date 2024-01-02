@@ -74,6 +74,7 @@
             background: 'var(--el-table-row-hover-bg-color)',
             color: 'var(--el-text-color-primary)'
           }"
+          :pagination="pagination"
           row-key="id"
           adaptive
           @page-size-change="handleSizeChange"
@@ -338,9 +339,11 @@ function resetForm(formEl) {
 
 async function onSearch() {
   loading.value = true;
-  const { rows } = await listExternal(form);
+  const { rows, total } = await listExternal(form);
   dataList.value = rows;
+  pagination.total = total;
   loading.value = false;
+  console.log(rows, total);
 }
 
 onMounted(() => {
