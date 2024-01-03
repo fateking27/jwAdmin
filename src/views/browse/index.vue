@@ -357,6 +357,7 @@ function renderChart() {
       type: "bar",
       id: "sales",
       barWidth: "30%",
+      silent: false,
       data: newData as DataItem[],
       universalTransition: {
         enabled: true,
@@ -364,34 +365,6 @@ function renderChart() {
       }
     }
   };
-
-  // const drilldownData = [
-  //   {
-  //     dataGroupId: "animals",
-  //     data: [
-  //       ["Cats", 4],
-  //       ["Dogs", 2],
-  //       ["Cows", 1],
-  //       ["Sheep", 2],
-  //       ["Pigs", 3]
-  //     ]
-  //   },
-  //   {
-  //     dataGroupId: "fruits",
-  //     data: [
-  //       ["Apples", 4],
-  //       ["Oranges", 2]
-  //     ]
-  //   },
-  //   {
-  //     dataGroupId: "cars",
-  //     data: [
-  //       ["Toyota", 4],
-  //       ["Opel", 2],
-  //       ["Volkswagen", 2]
-  //     ]
-  //   }
-  // ];
 
   console.log(arr);
   const drilldownData = arr;
@@ -401,6 +374,8 @@ function renderChart() {
     styleDisplay.value == "none"
       ? (styleDisplay.value = "flex")
       : (styleDisplay.value = "none");
+
+    // myChart.off('click')
 
     if (event.data) {
       const subData = drilldownData.find(function (data) {
@@ -418,6 +393,7 @@ function renderChart() {
         series: {
           type: "bar",
           id: "sales",
+          silent: true,
           dataGroupId: subData.dataGroupId,
           data: subData.data.map(function (item) {
             return item[1];
@@ -439,7 +415,6 @@ function renderChart() {
             onclick: function (e) {
               e.target.style.text = "";
               myChart.setOption(option);
-              // that.styleDisplay.value = "flex";
             }
           }
         ]
