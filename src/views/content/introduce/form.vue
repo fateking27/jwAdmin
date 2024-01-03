@@ -4,7 +4,7 @@
     v-model="showDrawer"
     :title="!isUpdate ? '新增文章' : '编辑文章'"
     :before-close="handleDrawerClose"
-    size="520px"
+    size="1020px"
   >
     <el-form label-width="110px" ref="portalRef" :rules="rules" :model="form">
       <el-form-item label="文章标题" prop="title">
@@ -13,6 +13,36 @@
           placeholder="请输入文章标题"
           maxlength="20"
         />
+      </el-form-item>
+
+      <el-form-item
+        style="display: none"
+        label="文章封面Id"
+        prop="coverMaterialId"
+      >
+        <el-input v-model="form.coverMaterialId" placeholder="" />
+      </el-form-item>
+
+      <el-form-item label="文章封面" prop="coverMaterialUrl">
+        <!-- 添加筛选 -->
+        <el-select
+          filterable
+          v-model="form.coverMaterialUrl"
+          placeholder="请选择文章封面"
+        >
+          <el-option-group
+            v-for="group in options"
+            :key="group.name"
+            :label="group.name"
+          >
+            <el-option
+              v-for="item in group.list"
+              :key="item.id"
+              :label="item.title"
+              :value="item.url"
+            />
+          </el-option-group>
+        </el-select>
       </el-form-item>
 
       <el-form-item label="索引号" prop="code">
@@ -74,11 +104,7 @@
       </el-form-item>
 
       <el-form-item label="文章内容" prop="content">
-        <el-input
-          v-model="form.content"
-          placeholder="请输入文章内容"
-          type="textarea"
-        />
+        <SuperEditor v-if="showDrawer" v-model:model-value="form.content" />
       </el-form-item>
 
       <el-form-item>
@@ -96,13 +122,15 @@
 
 <script setup lang="ts">
 import { FormInstance } from "element-plus";
-import { ref, reactive, toRefs } from "vue";
+import { ref, reactive, toRefs, onMounted } from "vue";
 import { message } from "@/utils/message";
-//import { handleTree } from "@pureadmin/utils";
 import { addPortal, updatePortal, getPortal } from "@/api/content/portal";
 import { useDict } from "@/utils/useDict";
-//const { sys_normal_disable } = useDict("sys_normal_disable");
+import { cloneDeep } from "@pureadmin/utils";
+import SuperEditor from "@/components/SuperEditor/index.vue";
+import { NewImg } from "@/api/content/new";
 
+let options = [];
 const portalRef = ref();
 const loading = ref(false);
 //const deptOptions = ref([]);
@@ -114,7 +142,10 @@ const data = reactive({
     title: [{ required: true, message: "文章标题不能为空", trigger: "blur" }],
     code: [{ required: true, message: "索引号不能为空", trigger: "blur" }],
     type: [{ required: true, message: "分类不能为空", trigger: "blur" }],
-    content: [{ required: true, message: "内容不能为空", trigger: "blur" }]
+    content: [{ required: true, message: "内容不能为空", trigger: "blur" }],
+    coverMaterialUrl: [
+      { required: true, message: "文章封面不能为空", trigger: "blur" }
+    ]
   }
 });
 
@@ -133,7 +164,8 @@ const reset = () => {
     releaseTime: undefined,
     release_status: undefined,
     promulgator: undefined,
-    source: undefined
+    source: undefined,
+    coverMaterialUrl: undefined
   };
   if (portalRef.value?.resetFields) {
     portalRef.value.resetFields();
@@ -141,6 +173,13 @@ const reset = () => {
 };
 
 const isUpdate = ref(false);
+
+//获取封面图片
+const getNewImg = async () => {
+  const res = await NewImg();
+  console.log(res);
+  options = res.data;
+};
 
 const handleDrawerClose = () => {
   reset();
@@ -200,6 +239,10 @@ const setData = async row => {
     });
   }
 };
+
+onMounted(() => {
+  getNewImg();
+});
 
 defineExpose({ showDrawer, isUpdate, setData });
 </script>
