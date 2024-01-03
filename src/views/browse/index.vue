@@ -35,7 +35,10 @@
       </el-form-item>
     </el-form>
 
-    <el-tabs type="border-card">
+    <el-tabs
+      type="border-card"
+      style="height: 770px; background-color: rgb(255 255 255)"
+    >
       <el-tab-pane label="表格">
         <PureTableBar
           title="文章列表"
@@ -66,12 +69,27 @@
       </el-tab-pane>
 
       <el-tab-pane label="图表">
-        <div id="chart" ref="chart" style="width: 600px; height: 400px" />
         <div
-          id="titleChart"
-          ref="titleChart"
-          style="width: 600px; height: 400px"
-        />
+          style="display: flex; justify-content: space-evenly; width: 1630px"
+        >
+          <el-card class="box-card">
+            <!-- <el-button @click="btn()" style="position: absolute;z-index: 99;">返回</el-button> -->
+            <div id="chart" ref="chart" style="width: 900px; height: 655px" />
+          </el-card>
+          <el-card
+            class="box-card"
+            :style="[
+              { display: styleDisplay },
+              { 'align-items': styleAlignItems }
+            ]"
+          >
+            <div
+              id="titleChart"
+              ref="titleChart"
+              style="width: 500px; height: 400px"
+            />
+          </el-card>
+        </div>
       </el-tab-pane>
     </el-tabs>
     <Form ref="formRef" @reload="onSearch" />
@@ -93,6 +111,18 @@ import Tree from "./tree.vue";
 defineOptions({
   name: "TypeArticle"
 });
+
+const styleTitleChart = reactive({
+  display: "flex",
+  alignItems: "center"
+});
+
+const styleDisplay = ref("flex");
+const styleAlignItems = ref("center");
+
+function btn() {
+  styleDisplay.value = "flex";
+}
 
 const dateRange = ref();
 
@@ -215,7 +245,7 @@ async function onSearch() {
 
   dataList.value = rows;
   loading.value = false;
-  // console.log(rows);
+  console.log(rows);
   handlerDatas(dataList.value); //调用数据分组方法
   renderChart();
   titleChart();
@@ -268,18 +298,48 @@ function renderChart() {
   });
 
   const newData = arr.map(({ value, groupId }) => ({ value, groupId }));
-  console.log(newData);
+  // console.log(newData);
 
   const option = {
+    title: {
+      text: "栏目总浏览次数统计",
+      // subtext: "浏览次数统计",
+      left: "center"
+    },
+    dataZoom: [
+      {
+        type: "inside",
+        show: true,
+        start: 0,
+        end: 40,
+        moveOnMouseWheel: true,
+        zoomOnMouseWheel: false,
+        xAxisIndex: [0]
+      },
+      {
+        type: "slider",
+        show: true,
+        start: 0,
+        end: 35,
+        // brushSelect: false,
+        height: 0,
+        xAxisIndex: [0]
+      }
+    ],
     xAxis: {
       type: "category",
       data: ["新闻信息", "门户及项目介绍", "成果内容展示"],
       axisLabel: {
-        fontSize: 9,
+        fontSize: 10,
         interval: 0,
-        rotate: 30,
-        formatter: function () {
-          return "";
+        rotate: 15,
+        formatter: function (value) {
+          const len = value.length;
+          if (len > 4) {
+            return value.substring(0, 4) + "...";
+          } else {
+            return value;
+          }
         }
       }
     },
@@ -296,6 +356,7 @@ function renderChart() {
     series: {
       type: "bar",
       id: "sales",
+      barWidth: "30%",
       data: newData as DataItem[],
       universalTransition: {
         enabled: true,
@@ -336,6 +397,11 @@ function renderChart() {
   const drilldownData = arr;
 
   myChart.on("click", function (event) {
+    //隐藏左边饼状图
+    styleDisplay.value == "none"
+      ? (styleDisplay.value = "flex")
+      : (styleDisplay.value = "none");
+
     if (event.data) {
       const subData = drilldownData.find(function (data) {
         return data.dataGroupId === (event.data as DataItem).groupId;
@@ -367,17 +433,20 @@ function renderChart() {
             left: 50,
             top: 20,
             style: {
-              text: "Back",
+              text: "返回",
               fontSize: 18
             },
-            onclick: function () {
+            onclick: function (e) {
+              e.target.style.text = "";
               myChart.setOption(option);
+              // that.styleDisplay.value = "flex";
             }
           }
         ]
       });
     }
   });
+
   option && myChart.setOption(option);
 }
 
@@ -385,68 +454,64 @@ function titleChart() {
   const chart = document.getElementById("titleChart");
   const titleChart = echarts.init(chart);
 
+  const arr = listArticleData.handlerList.map(({ articleType, viewCount }) => ({
+    articleType,
+    viewCount
+  }));
+  const data = arr.map(item => {
+    return {
+      value: item.viewCount,
+      name: item.articleType
+    };
+  });
+
+  console.log(data);
+
   const options = {
     title: {
-      text: "Stacked Line"
+      text: "栏目总浏览次数占比",
+      left: "center"
     },
     tooltip: {
-      trigger: "axis"
+      trigger: "item"
     },
     legend: {
-      data: ["Email", "Union Ads", "Video Ads", "Direct", "Search Engine"]
-    },
-    grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
-      containLabel: true
-    },
-    toolbox: {
-      feature: {
-        saveAsImage: {}
-      }
-    },
-    xAxis: {
-      type: "category",
-      boundaryGap: false,
-      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    },
-    yAxis: {
-      type: "value"
+      orient: "vertical",
+      left: "right"
     },
     series: [
       {
-        name: "Email",
-        type: "line",
-        stack: "Total",
-        data: [120, 132, 101, 134, 90, 230, 210]
-      },
-      {
-        name: "Union Ads",
-        type: "line",
-        stack: "Total",
-        data: [220, 182, 191, 234, 290, 330, 310]
-      },
-      {
-        name: "Video Ads",
-        type: "line",
-        stack: "Total",
-        data: [150, 232, 201, 154, 190, 330, 410]
-      },
-      {
-        name: "Direct",
-        type: "line",
-        stack: "Total",
-        data: [320, 332, 301, 334, 390, 330, 320]
-      },
-      {
-        name: "Search Engine",
-        type: "line",
-        stack: "Total",
-        data: [820, 932, 901, 934, 1290, 1330, 1320]
+        name: "Access From",
+        type: "pie",
+        radius: ["35%", "55%"],
+        data: data,
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: "rgba(0, 0, 0, 0.5)"
+          }
+        }
       }
-    ]
+    ],
+    label: {
+      formatter: "{b}：{d}%"
+    },
+    graphic: {
+      type: "text",
+      left: "center",
+      top: "middle",
+      style: {
+        text: "总浏览次数：",
+        fontSize: 16
+      }
+    }
   };
+
+  let total = 0;
+  options.series[0].data.forEach(item => [(total += item.value)]);
+
+  options.graphic.style.text += total;
 
   options && titleChart.setOption(options);
 }

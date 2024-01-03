@@ -107,18 +107,15 @@ const initMaterialMenuEvent = () => {
   });
 };
 
-interface IProps {
+const props = defineProps<{
   modelValue: string;
-}
-const props = withDefaults(defineProps<IProps>(), {
-  modelValue: ""
-});
-const emit = defineEmits(["update:modelValue"]);
+}>();
+const emit = defineEmits<{
+  (e: "update:modelValue", v: string): void;
+}>();
 const content = computed({
-  get() {
-    return props.modelValue;
-  },
-  set(value) {
+  get: () => props.modelValue,
+  set: value => {
     emit("update:modelValue", value);
   }
 });
@@ -153,4 +150,3 @@ const submitMaterial = () => {
   materialDialogShow.value = false;
 };
 </script>
-<style lang="scss" scoped></style>

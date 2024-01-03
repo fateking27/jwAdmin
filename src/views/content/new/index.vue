@@ -252,8 +252,8 @@ const columns: TableColumnList = [
 
 const handleAdd = row => {
   formRef.value.isUpdate = false;
-  formRef.value.setData();
   formRef.value.showDrawer = true;
+  formRef.value.setData();
 };
 
 function handlePublish(row) {
@@ -279,8 +279,8 @@ function handleCancel(row) {
 }
 const handleUpdate = row => {
   formRef.value.isUpdate = true;
-  formRef.value.setData(row);
   formRef.value.showDrawer = true;
+  formRef.value.setData(row);
 };
 
 const handleSelectionChange = val => {
