@@ -273,13 +273,38 @@ function renderChart() {
   console.log(newData);
 
   const option = {
+    title: {
+      text: "文章浏览次数统计",
+      // subtext: "浏览次数统计",
+      left: "center"
+    },
+    dataZoom: [
+      {
+        type: "inside",
+        show: true,
+        start: 0,
+        end: 35,
+        moveOnMouseWheel: true,
+        zoomOnMouseWheel: false,
+        xAxisIndex: [0]
+      },
+      {
+        type: "slider",
+        show: true,
+        start: 0,
+        end: 35,
+        // brushSelect: false,
+        height: 0,
+        xAxisIndex: [0]
+      }
+    ],
     xAxis: {
       type: "category",
       data: ["新闻信息", "门户及项目介绍", "成果内容展示"],
       axisLabel: {
-        fontSize: 11,
+        fontSize: "50%",
         interval: 0,
-        rotate: 70,
+        // rotate: 70,
         formatter: function (value) {
           const len = value.length;
           if (len > 4) {
@@ -303,6 +328,7 @@ function renderChart() {
     series: {
       type: "bar",
       id: "sales",
+      barWidth: "30%",
       data: newData as DataItem[],
       universalTransition: {
         enabled: true,
@@ -377,7 +403,8 @@ function renderChart() {
               text: "Back",
               fontSize: 18
             },
-            onclick: function () {
+            onclick: function (e) {
+              e.target.style.text = "";
               myChart.setOption(option);
             }
           }
@@ -407,8 +434,8 @@ function titleChart() {
 
   const options = {
     title: {
-      text: "新闻栏目文章",
-      subtext: "浏览量统计",
+      text: "文章类型",
+      subtext: "浏览次数统计",
       left: "center"
     },
     tooltip: {
