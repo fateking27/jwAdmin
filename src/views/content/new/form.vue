@@ -89,7 +89,7 @@
         />
       </el-form-item>
       <el-form-item label="内容" prop="content">
-        <SuperEditor v-model:model-value="form.content" />
+        <SuperEditor v-if="showDrawer" v-model:model-value="form.content" />
       </el-form-item>
       <el-form-item style="margin-top: 20px; margin-left: -110px">
         <el-button type="primary" :loading="loading" @click="onSubmit(newRef)"
@@ -105,7 +105,6 @@
 import { FormInstance } from "element-plus";
 import { ref, reactive, toRefs, shallowRef, onMounted } from "vue";
 import { message } from "@/utils/message";
-
 import { addNew, updateNew, getNew, NewImg } from "@/api/content/new";
 import { cloneDeep } from "@pureadmin/utils";
 import SuperEditor from "@/components/SuperEditor/index.vue";
@@ -127,7 +126,10 @@ const data = reactive({
   form: {} as any,
   rules: {
     name: [{ required: true, message: "新闻名称不能为空", trigger: "blur" }],
-    type: [{ required: true, message: "新闻类别不能为空", trigger: "blur" }]
+    type: [{ required: true, message: "新闻类别不能为空", trigger: "blur" }],
+    coverMaterialUrl: [
+      { required: true, message: "新闻封面不能为空", trigger: "blur" }
+    ]
   }
 });
 

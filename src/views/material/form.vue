@@ -135,7 +135,7 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       if (!isUpdate.value) {
-        alert(form.value.author);
+        // alert(form.value.author);
         await addMaterial(form.value)
           .then(() => {
             message("新增成功", {
@@ -186,6 +186,7 @@ const setData = async (row, type) => {
     });
     if (form.value.type == "0") {
       form.value.imageUrl = `${VITE_API_PATH}/static/${res.data.staticPath}`;
+      console.log(res.data.staticPath);
     }
   }
 };
