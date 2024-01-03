@@ -66,12 +66,14 @@
       </el-tab-pane>
 
       <el-tab-pane label="图表">
-        <div id="chart" ref="chart" style="width: 600px; height: 400px" />
-        <div
-          id="titleChart"
-          ref="titleChart"
-          style="width: 600px; height: 400px"
-        />
+        <div style="display: flex">
+          <div id="chart" ref="chart" style="width: 1150px; height: 400px" />
+          <div
+            id="titleChart"
+            ref="titleChart"
+            style="width: 550px; height: 400px"
+          />
+        </div>
       </el-tab-pane>
     </el-tabs>
     <Form ref="formRef" @reload="onSearch" />
@@ -215,7 +217,7 @@ async function onSearch() {
 
   dataList.value = rows;
   loading.value = false;
-  // console.log(rows);
+  console.log(rows);
   handlerDatas(dataList.value); //调用数据分组方法
   renderChart();
   titleChart();
@@ -275,11 +277,16 @@ function renderChart() {
       type: "category",
       data: ["新闻信息", "门户及项目介绍", "成果内容展示"],
       axisLabel: {
-        fontSize: 9,
+        fontSize: 11,
         interval: 0,
-        rotate: 30,
-        formatter: function () {
-          return "";
+        rotate: 70,
+        formatter: function (value) {
+          const len = value.length;
+          if (len > 4) {
+            return value.substring(0, 4) + "...";
+          } else {
+            return value;
+          }
         }
       }
     },
@@ -385,65 +392,45 @@ function titleChart() {
   const chart = document.getElementById("titleChart");
   const titleChart = echarts.init(chart);
 
+  const arr = listArticleData.handlerList.map(({ articleType, viewCount }) => ({
+    articleType,
+    viewCount
+  }));
+  const data = arr.map(item => {
+    return {
+      value: item.viewCount,
+      name: item.articleType
+    };
+  });
+
+  console.log(data);
+
   const options = {
     title: {
-      text: "Stacked Line"
+      text: "新闻栏目文章",
+      subtext: "浏览量统计",
+      left: "center"
     },
     tooltip: {
-      trigger: "axis"
+      trigger: "item"
     },
     legend: {
-      data: ["Email", "Union Ads", "Video Ads", "Direct", "Search Engine"]
-    },
-    grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
-      containLabel: true
-    },
-    toolbox: {
-      feature: {
-        saveAsImage: {}
-      }
-    },
-    xAxis: {
-      type: "category",
-      boundaryGap: false,
-      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    },
-    yAxis: {
-      type: "value"
+      orient: "vertical",
+      left: "left"
     },
     series: [
       {
-        name: "Email",
-        type: "line",
-        stack: "Total",
-        data: [120, 132, 101, 134, 90, 230, 210]
-      },
-      {
-        name: "Union Ads",
-        type: "line",
-        stack: "Total",
-        data: [220, 182, 191, 234, 290, 330, 310]
-      },
-      {
-        name: "Video Ads",
-        type: "line",
-        stack: "Total",
-        data: [150, 232, 201, 154, 190, 330, 410]
-      },
-      {
-        name: "Direct",
-        type: "line",
-        stack: "Total",
-        data: [320, 332, 301, 334, 390, 330, 320]
-      },
-      {
-        name: "Search Engine",
-        type: "line",
-        stack: "Total",
-        data: [820, 932, 901, 934, 1290, 1330, 1320]
+        name: "Access From",
+        type: "pie",
+        radius: "50%",
+        data: data,
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: "rgba(0, 0, 0, 0.5)"
+          }
+        }
       }
     ]
   };
