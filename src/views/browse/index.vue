@@ -35,7 +35,10 @@
       </el-form-item>
     </el-form>
 
-    <el-tabs type="border-card">
+    <el-tabs
+      type="border-card"
+      style="height: 770px; background-color: rgb(255 255 255)"
+    >
       <el-tab-pane label="表格">
         <PureTableBar
           title="文章列表"
@@ -66,13 +69,26 @@
       </el-tab-pane>
 
       <el-tab-pane label="图表">
-        <div style="display: flex">
-          <div id="chart" ref="chart" style="width: 1150px; height: 400px" />
-          <div
-            id="titleChart"
-            ref="titleChart"
-            style="width: 550px; height: 400px"
-          />
+        <div
+          style="display: flex; justify-content: space-evenly; width: 1630px"
+        >
+          <el-card class="box-card">
+            <!-- <el-button @click="btn()" style="position: absolute;z-index: 99;">返回</el-button> -->
+            <div id="chart" ref="chart" style="width: 900px; height: 655px" />
+          </el-card>
+          <el-card
+            class="box-card"
+            :style="[
+              { display: styleDisplay },
+              { 'align-items': styleAlignItems }
+            ]"
+          >
+            <div
+              id="titleChart"
+              ref="titleChart"
+              style="width: 500px; height: 400px"
+            />
+          </el-card>
         </div>
       </el-tab-pane>
     </el-tabs>
@@ -95,6 +111,18 @@ import Tree from "./tree.vue";
 defineOptions({
   name: "TypeArticle"
 });
+
+const styleTitleChart = reactive({
+  display: "flex",
+  alignItems: "center"
+});
+
+const styleDisplay = ref("flex");
+const styleAlignItems = ref("center");
+
+function btn() {
+  styleDisplay.value = "flex";
+}
 
 const dateRange = ref();
 
@@ -270,11 +298,11 @@ function renderChart() {
   });
 
   const newData = arr.map(({ value, groupId }) => ({ value, groupId }));
-  console.log(newData);
+  // console.log(newData);
 
   const option = {
     title: {
-      text: "文章浏览次数统计",
+      text: "栏目总浏览次数统计",
       // subtext: "浏览次数统计",
       left: "center"
     },
@@ -283,7 +311,7 @@ function renderChart() {
         type: "inside",
         show: true,
         start: 0,
-        end: 35,
+        end: 40,
         moveOnMouseWheel: true,
         zoomOnMouseWheel: false,
         xAxisIndex: [0]
@@ -302,9 +330,9 @@ function renderChart() {
       type: "category",
       data: ["新闻信息", "门户及项目介绍", "成果内容展示"],
       axisLabel: {
-        fontSize: "50%",
+        fontSize: 10,
         interval: 0,
-        // rotate: 70,
+        rotate: 15,
         formatter: function (value) {
           const len = value.length;
           if (len > 4) {
@@ -369,6 +397,11 @@ function renderChart() {
   const drilldownData = arr;
 
   myChart.on("click", function (event) {
+    //隐藏左边饼状图
+    styleDisplay.value == "none"
+      ? (styleDisplay.value = "flex")
+      : (styleDisplay.value = "none");
+
     if (event.data) {
       const subData = drilldownData.find(function (data) {
         return data.dataGroupId === (event.data as DataItem).groupId;
@@ -400,18 +433,20 @@ function renderChart() {
             left: 50,
             top: 20,
             style: {
-              text: "Back",
+              text: "返回",
               fontSize: 18
             },
             onclick: function (e) {
               e.target.style.text = "";
               myChart.setOption(option);
+              // that.styleDisplay.value = "flex";
             }
           }
         ]
       });
     }
   });
+
   option && myChart.setOption(option);
 }
 
@@ -434,8 +469,7 @@ function titleChart() {
 
   const options = {
     title: {
-      text: "文章类型",
-      subtext: "浏览次数统计",
+      text: "栏目总浏览次数占比",
       left: "center"
     },
     tooltip: {
@@ -443,13 +477,13 @@ function titleChart() {
     },
     legend: {
       orient: "vertical",
-      left: "left"
+      left: "right"
     },
     series: [
       {
         name: "Access From",
         type: "pie",
-        radius: "50%",
+        radius: ["35%", "55%"],
         data: data,
         emphasis: {
           itemStyle: {
@@ -459,8 +493,25 @@ function titleChart() {
           }
         }
       }
-    ]
+    ],
+    label: {
+      formatter: "{b}：{d}%"
+    },
+    graphic: {
+      type: "text",
+      left: "center",
+      top: "middle",
+      style: {
+        text: "总浏览次数：",
+        fontSize: 16
+      }
+    }
   };
+
+  let total = 0;
+  options.series[0].data.forEach(item => [(total += item.value)]);
+
+  options.graphic.style.text += total;
 
   options && titleChart.setOption(options);
 }
