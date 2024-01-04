@@ -86,7 +86,7 @@
             <div
               id="titleChart"
               ref="titleChart"
-              style="width: 500px; height: 400px"
+              style="width: 500px; height: 655px"
             />
           </el-card>
         </div>
@@ -303,7 +303,7 @@ function renderChart() {
   const option = {
     title: {
       text: "栏目总浏览次数统计",
-      // subtext: "浏览次数统计",
+      subtext: "",
       left: "center"
     },
     dataZoom: [
@@ -311,7 +311,7 @@ function renderChart() {
         type: "inside",
         show: true,
         start: 0,
-        end: 40,
+        end: 100,
         moveOnMouseWheel: true,
         zoomOnMouseWheel: false,
         xAxisIndex: [0]
@@ -327,12 +327,13 @@ function renderChart() {
       }
     ],
     xAxis: {
+      name: "栏目名称",
       type: "category",
       data: ["新闻信息", "门户及项目介绍", "成果内容展示"],
       axisLabel: {
-        fontSize: 10,
+        fontSize: 14,
         interval: 0,
-        rotate: 15,
+        // rotate: 15,
         formatter: function (value) {
           const len = value.length;
           if (len > 4) {
@@ -350,13 +351,19 @@ function renderChart() {
         type: "shadow"
       }
     },
-    yAxis: {},
+    yAxis: {
+      name: "浏览次数",
+      nameTextStyle: {
+        padding: [0, 0, 0, -100]
+      }
+      // nameRotate:'90'
+    },
     dataGroupId: "",
     animationDurationUpdate: 500,
     series: {
       type: "bar",
       id: "sales",
-      barWidth: "30%",
+      barWidth: "20%",
       silent: false,
       data: newData as DataItem[],
       universalTransition: {
@@ -381,18 +388,39 @@ function renderChart() {
       const subData = drilldownData.find(function (data) {
         return data.dataGroupId === (event.data as DataItem).groupId;
       });
+
+      console.log(subData.dataGroupId);
+
+      let dataZoomEnd = 0;
+      subData.data.length > 35 ? (dataZoomEnd = 60) : (dataZoomEnd = 100);
+
       if (!subData) {
         return;
       }
       myChart.setOption<echarts.EChartsOption>({
+        title: {
+          text: subData.dataGroupId + "：文章浏览次数统计",
+          subtext: "栏目下共有" + subData.data.length + "篇文章",
+          left: "center"
+        },
         xAxis: {
+          name: "",
           data: subData.data.map(function (item) {
             return item[0];
-          })
+          }),
+          axisLabel: {
+            // fontSize: 10,
+            // interval: 0,
+            // rotate: 15,
+            formatter: function (value) {
+              return "";
+            }
+          }
         },
         series: {
           type: "bar",
           id: "sales",
+          barWidth: "30%",
           silent: true,
           dataGroupId: subData.dataGroupId,
           data: subData.data.map(function (item) {
@@ -406,8 +434,8 @@ function renderChart() {
         graphic: [
           {
             type: "text",
-            left: 50,
-            top: 20,
+            left: 0,
+            top: 0,
             style: {
               text: "返回",
               fontSize: 18
@@ -416,6 +444,26 @@ function renderChart() {
               e.target.style.text = "";
               myChart.setOption(option);
             }
+          }
+        ],
+        dataZoom: [
+          {
+            show: true,
+            start: 0,
+            end: dataZoomEnd,
+            xAxisIndex: [0]
+          },
+          {
+            type: "inside",
+            moveOnMouseWheel: true,
+            zoomOnMouseWheel: false
+            // xAxisIndex: [0]
+          },
+          {
+            type: "slider",
+            // brushSelect: false,
+            height: 0
+            // xAxisIndex: [0]
           }
         ]
       });
@@ -446,19 +494,20 @@ function titleChart() {
     title: {
       text: "栏目总浏览次数占比",
       left: "center"
+      // top: 0
     },
     tooltip: {
       trigger: "item"
     },
     legend: {
-      orient: "vertical",
-      left: "right"
+      orient: "horizontal",
+      y: "bottom"
     },
     series: [
       {
         name: "Access From",
         type: "pie",
-        radius: ["35%", "55%"],
+        radius: ["35%", "65%"],
         data: data,
         emphasis: {
           itemStyle: {
@@ -466,6 +515,10 @@ function titleChart() {
             shadowOffsetX: 0,
             shadowColor: "rgba(0, 0, 0, 0.5)"
           }
+        },
+        labelLine: {
+          length: 55, // 修改引导线第一段的长度
+          length2: 25 // 修改引导线第二段的长度
         }
       }
     ],
