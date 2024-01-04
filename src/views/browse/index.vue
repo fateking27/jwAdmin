@@ -32,6 +32,7 @@
         >
           重置
         </el-button>
+        <el-button @click="listExport()">导出</el-button>
       </el-form-item>
     </el-form>
 
@@ -97,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { listBrowse, listArticle } from "@/api/Browse/browse";
+import { listBrowse, listArticle, listExport } from "@/api/Browse/browse";
 import { onMounted, reactive, ref } from "vue";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
@@ -335,12 +336,12 @@ function renderChart() {
         interval: 0,
         // rotate: 15,
         formatter: function (value) {
-          const len = value.length;
-          if (len > 4) {
-            return value.substring(0, 4) + "...";
-          } else {
-            return value;
-          }
+          // const len = value.length;
+          // if (len > 4) {
+          //   return value.substring(0, 4) + "...";
+          // } else {
+          return value;
+          // }
         }
       }
     },
@@ -369,6 +370,10 @@ function renderChart() {
       universalTransition: {
         enabled: true,
         divideShape: "clone"
+      },
+      label: {
+        show: true,
+        position: "top"
       }
     }
   };
@@ -423,6 +428,9 @@ function renderChart() {
           barWidth: "30%",
           silent: true,
           dataGroupId: subData.dataGroupId,
+          label: {
+            show: false
+          },
           data: subData.data.map(function (item) {
             return item[1];
           }),
