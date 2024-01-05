@@ -51,7 +51,7 @@
             <pure-table
               ref="tableRef"
               border
-              align-whole="center"
+              align-whole="left"
               showOverflowTooltip
               :default-expand-all="true"
               :loading="loading"
@@ -74,14 +74,26 @@
           style="display: flex; justify-content: space-evenly; width: 1630px"
         >
           <el-card class="box-card">
-            <!-- <el-button @click="btn()" style="position: absolute;z-index: 99;">返回</el-button> -->
-            <div id="chart" ref="chart" style="width: 900px; height: 655px" />
+            <div
+              id="chart"
+              ref="chart"
+              :style="[
+                {
+                  width: width,
+                  height: height,
+                  display: 'flex',
+                  justifyContent: 'center'
+                }
+              ]"
+            />
           </el-card>
           <el-card
             class="box-card"
             :style="[
-              { display: styleDisplay },
-              { 'align-items': styleAlignItems }
+              {
+                display: styleDisplay,
+                'align-items': styleAlignItems
+              }
             ]"
           >
             <div
@@ -120,10 +132,8 @@ const styleTitleChart = reactive({
 
 const styleDisplay = ref("flex");
 const styleAlignItems = ref("center");
-
-function btn() {
-  styleDisplay.value = "flex";
-}
+const width = ref("900px");
+const height = ref("655px");
 
 const dateRange = ref();
 
@@ -232,7 +242,7 @@ const handlerDatas = arr => {
             ? "门户及项目介绍"
             : item.articleType == "2"
             ? "成果内容展示"
-            : "未分类"
+            : "对外服务"
       };
     }
   );
@@ -248,8 +258,10 @@ async function onSearch() {
   loading.value = false;
   console.log(rows);
   handlerDatas(dataList.value); //调用数据分组方法
-  renderChart();
-  titleChart();
+  setTimeout(() => {
+    renderChart();
+    titleChart();
+  }, 200);
 }
 
 const SearchData = async (dateRange?) => {
@@ -275,6 +287,7 @@ function renderChart() {
   // 创建柱形图
   const chartDom = document.getElementById("chart");
   const myChart = echarts.init(chartDom);
+
   // let option: EChartsOption;
 
   interface DataItem {
@@ -302,6 +315,7 @@ function renderChart() {
   // console.log(newData);
 
   const option = {
+    // width: 800,
     title: {
       text: "栏目总浏览次数统计",
       subtext: "",
@@ -310,27 +324,26 @@ function renderChart() {
     dataZoom: [
       {
         type: "inside",
-        show: true,
+        moveOnMouseWheel: true,
+        show: false,
         start: 0,
         end: 100,
-        moveOnMouseWheel: true,
-        zoomOnMouseWheel: false,
-        xAxisIndex: [0]
+        xAxisIndex: [0],
+        zoomOnMouseWheel: false
       },
       {
         type: "slider",
-        show: true,
+        show: false,
         start: 0,
-        end: 35,
-        // brushSelect: false,
-        height: 0,
-        xAxisIndex: [0]
+        end: 100,
+        xAxisIndex: [0],
+        height: 0
       }
     ],
     xAxis: {
       name: "栏目名称",
       type: "category",
-      data: ["新闻信息", "门户及项目介绍", "成果内容展示"],
+      data: ["新闻信息", "门户及项目介绍", "成果内容展示", "对外服务"],
       axisLabel: {
         fontSize: 14,
         interval: 0,
@@ -364,7 +377,7 @@ function renderChart() {
     series: {
       type: "bar",
       id: "sales",
-      barWidth: "20%",
+      barWidth: 35,
       silent: false,
       data: newData as DataItem[],
       universalTransition: {
@@ -376,18 +389,23 @@ function renderChart() {
         position: "top"
       }
     }
+    // grid: {
+    //   width: "700px"
+    // }
   };
 
   console.log(arr);
   const drilldownData = arr;
 
   myChart.on("click", function (event) {
-    //隐藏左边饼状图
+    //隐藏饼状图
     styleDisplay.value == "none"
       ? (styleDisplay.value = "flex")
       : (styleDisplay.value = "none");
 
-    // myChart.off('click')
+    width.value == "1400px"
+      ? (width.value = "900px")
+      : (width.value = "1400px");
 
     if (event.data) {
       const subData = drilldownData.find(function (data) {
@@ -397,7 +415,7 @@ function renderChart() {
       console.log(subData.dataGroupId);
 
       let dataZoomEnd = 0;
-      subData.data.length > 35 ? (dataZoomEnd = 60) : (dataZoomEnd = 100);
+      subData.data.length > 35 ? (dataZoomEnd = 15) : (dataZoomEnd = 100);
 
       if (!subData) {
         return;
@@ -408,24 +426,36 @@ function renderChart() {
           subtext: "栏目下共有" + subData.data.length + "篇文章",
           left: "center"
         },
+        // grid: {
+        //   width:'1300px',
+        //   containLabel: true
+        // },
         xAxis: {
           name: "",
           data: subData.data.map(function (item) {
             return item[0];
           }),
           axisLabel: {
-            // fontSize: 10,
-            // interval: 0,
+            fontSize: 10,
+            interval: 0,
             // rotate: 15,
+            // formatter: function (value) {
+            //   return "";
+            // }
             formatter: function (value) {
-              return "";
+              const len = value.length;
+              if (len > 4) {
+                return value.substring(0, 4) + "...";
+              } else {
+                return value;
+              }
             }
           }
         },
         series: {
           type: "bar",
           id: "sales",
-          barWidth: "30%",
+          barWidth: 30,
           silent: true,
           dataGroupId: subData.dataGroupId,
           label: {
@@ -456,22 +486,21 @@ function renderChart() {
         ],
         dataZoom: [
           {
+            type: "inside",
+            moveOnMouseWheel: true,
+            zoomOnMouseWheel: false,
             show: true,
             start: 0,
             end: dataZoomEnd,
             xAxisIndex: [0]
           },
           {
-            type: "inside",
-            moveOnMouseWheel: true,
-            zoomOnMouseWheel: false
-            // xAxisIndex: [0]
-          },
-          {
             type: "slider",
-            // brushSelect: false,
-            height: 0
-            // xAxisIndex: [0]
+            height: 0,
+            show: true,
+            start: 0,
+            end: dataZoomEnd,
+            xAxisIndex: [0]
           }
         ]
       });

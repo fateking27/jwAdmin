@@ -25,7 +25,7 @@ export const listArticle = (data?: object) => {
   });
 };
 
-/**导出查询条件后的浏览量记录**/
+/**导出浏览量记录**/
 export const listExport = (data?: any) => {
   return http
     .request<Result>("get", "/business/browse/export", {
