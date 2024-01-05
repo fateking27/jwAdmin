@@ -11,7 +11,7 @@
         <el-input
           v-model="form.title"
           placeholder="请输入文章标题"
-          maxlength="20"
+          maxlength="40"
         />
       </el-form-item>
 
@@ -182,7 +182,7 @@ const getNewImg = async () => {
 };
 
 const handleDrawerClose = () => {
-  reset();
+  // reset();
   showDrawer.value = false;
 };
 

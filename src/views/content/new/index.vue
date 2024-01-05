@@ -93,7 +93,6 @@
           @selection-change="handleSelectionChange"
           @sort-change="handleSortChange"
         >
-          <!--          <template #status="{ row }" />-->
           <template #operation="{ row }">
             <el-button
               class="reset-margin"
@@ -102,6 +101,7 @@
               :size="size"
               @click="handlePublish(row)"
               :icon="useRenderIcon(Publish)"
+              :disabled="row.releaseStatus === '1'"
               v-if="hasAuth(['system:dept:add'])"
             >
               发布
@@ -113,6 +113,7 @@
               :size="size"
               @click="handleCancel(row)"
               :icon="useRenderIcon(Cancel)"
+              :disabled="row.releaseStatus === '0'"
               v-if="hasAuth(['system:dept:add'])"
             >
               撤销
@@ -238,6 +239,11 @@ const columns: TableColumnList = [
     width: 120
   },
   {
+    label: "来源",
+    prop: "source",
+    width: 120
+  },
+  {
     label: "新闻内容",
     prop: "content",
     width: 120
@@ -257,24 +263,22 @@ const handleAdd = row => {
 };
 
 function handlePublish(row) {
-  row.release_status = 1;
+  row.releaseStatus = 1;
   releaseNew(row.id).then(() => {
     message("发布成功", {
       type: "success"
     });
     getList();
-    console.log(row.release_status);
   });
 }
 
 function handleCancel(row) {
-  row.release_status = 0;
+  row.releaseStatus = 0;
   releaseNew(row.id).then(() => {
     message("撤回成功", {
       type: "success"
     });
     getList();
-    console.log(row.release_status);
   });
 }
 const handleUpdate = row => {

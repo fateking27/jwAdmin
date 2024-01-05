@@ -104,6 +104,7 @@
               @click="handlePublish(row)"
               :icon="useRenderIcon(Publish)"
               v-if="hasAuth(['system:dept:add'])"
+              :disabled="row.releaseStatus === '1'"
             >
               发布
             </el-button>
@@ -115,6 +116,7 @@
               @click="handleCancel(row)"
               :icon="useRenderIcon(Cancel)"
               v-if="hasAuth(['system:dept:add'])"
+              :disabled="row.releaseStatus === '0'"
             >
               撤销
             </el-button>
@@ -266,7 +268,17 @@ const handleAdd = row => {
 };
 
 function handlePublish(row) {
-  row.release_status = 1;
+  // 判断是否已存在同类型文章已发布
+  const hasPublished = dataList.value.some(
+    item => item.type === row.type && item.releaseStatus === "1"
+  );
+  if (hasPublished) {
+    message("同类型文章已经发布，不能重复发布", {
+      type: "warning"
+    });
+    return;
+  }
+  row.releaseStatus = 1;
   releasePortal(row.id).then(() => {
     message("发布成功", {
       type: "success"
@@ -276,7 +288,7 @@ function handlePublish(row) {
 }
 
 function handleCancel(row) {
-  row.release_status = 0;
+  row.releaseStatus = 0;
   releasePortal(row.id).then(() => {
     message("撤回成功", {
       type: "success"
@@ -309,7 +321,6 @@ const handleSortChange = column => {
 };
 
 const handleSizeChange = (val: number) => {
-  // console.log(`${val} items per page`);
   pagination.pageSize = val;
   form.pageSize = pagination.pageSize;
   onSearch();
