@@ -29,6 +29,14 @@
           maxlength="10"
         />
       </el-form-item>
+      <el-form-item label="排序" prop="orderNo">
+        <el-input-number
+          :min="0"
+          :max="100"
+          v-model="form.orderNo"
+          placeholder="请输入排序"
+        />
+      </el-form-item>
 
       <el-form-item label="是否显示图片" prop="isShow">
         <el-radio-group v-model="form.isShow">
@@ -81,6 +89,7 @@ import { getFileInfo, uploadFile } from "@/api/wjx/file";
 import { addMaterial, updateMaterial } from "@/api/wjx/material";
 import { useDict } from "@/utils/useDict";
 import { Plus } from "@element-plus/icons-vue";
+import {cloneDeep} from "@pureadmin/utils";
 
 const { VITE_API_PATH } = import.meta.env;
 const { sys_cover_status } = useDict("sys_cover_status");
@@ -111,7 +120,7 @@ const reset = () => {
     fileId: undefined,
     description: undefined,
     author: undefined,
-    orderNo: undefined,
+    orderNo: 0,
     isShow: "1",
     imageUrl: undefined,
     type: undefined
@@ -178,7 +187,7 @@ const setData = async (row, type) => {
     isUpdate.value = false;
   } else {
     isUpdate.value = true;
-    form.value = row;
+    form.value = cloneDeep(row);
     const res = await getFileInfo(form.value.fileId);
     fileList.value.push({
       id: res.data.id,

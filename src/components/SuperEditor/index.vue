@@ -73,7 +73,6 @@ const handleCreated = async editor => {
   await initMaterialTree();
   initMaterialMenuEvent();
 };
-
 const registerMenu = (
   editor: IDomEditor,
   toolbarConfig: Partial<IToolbarConfig>
@@ -123,6 +122,7 @@ const content = computed({
 const submitMaterial = () => {
   if (form.materialId) {
     const material = materialMap.get(form.materialId);
+    debugger
     if (material) {
       if (material.type == "0") {
         editorRef.value.insertNode({

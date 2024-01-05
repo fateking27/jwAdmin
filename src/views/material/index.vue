@@ -153,17 +153,22 @@ const columns: TableColumnList = [
     label: "标题",
     prop: "title",
     align: "left",
-    width: 120
+    width: 300
   },
   {
     label: "作者",
     prop: "author",
-    width: 300
+    width: 150
+  },
+  {
+    label: "排序",
+    prop: "orderNo",
+    width: 60
   },
   {
     label: "描述",
     prop: "description",
-    minWidth: 300
+    minWidth: 200
   },
   {
     label: "操作",
