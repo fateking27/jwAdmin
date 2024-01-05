@@ -43,6 +43,7 @@ const audioRef = ref();
 const showMaterial = async row => {
   data.value = row;
   dialogVisible.value = true;
+  console.log(data.value);
 };
 
 defineExpose({ showMaterial });

@@ -151,4 +151,3 @@ const submitMaterial = () => {
   materialDialogShow.value = false;
 };
 </script>
-<style lang="scss" scoped></style>

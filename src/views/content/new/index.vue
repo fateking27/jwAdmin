@@ -80,6 +80,8 @@
           :size="size"
           :data="dataList"
           :columns="dynamicColumns"
+          :pagination="pagination"
+          :paginationSmall="size === 'small'"
           :header-cell-style="{
             background: 'var(--el-table-row-hover-bg-color)',
             color: 'var(--el-text-color-primary)'
@@ -147,7 +149,7 @@
         </pure-table>
       </template>
     </PureTableBar>
-    <Form ref="formRef" @reload="onSearch" />
+    <Form ref="formRef" @reload="getList" />
   </div>
 </template>
 <script setup lang="ts">
@@ -162,19 +164,10 @@ import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
 import Publish from "@iconify-icons/ep/document";
 import Cancel from "@iconify-icons/ep/circle-close";
-import dayjs from "dayjs";
-import { handleTree } from "@/utils/tree";
-import { useDict } from "@/utils/useDict";
 import Form from "./form.vue";
 import { hasAuth } from "@/router/utils";
 import { message } from "@/utils/message";
-import {
-  delNew,
-  getNew,
-  listNew,
-  releaseNew,
-  updateNew
-} from "@/api/content/new";
+import { delNew, listNew, releaseNew, updateNew } from "@/api/content/new";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { listPost } from "@/api/system/post";
 import { ElMessageBox } from "element-plus";
@@ -269,7 +262,8 @@ function handlePublish(row) {
     message("发布成功", {
       type: "success"
     });
-    onSearch();
+    getList();
+    console.log(row.release_status);
   });
 }
 
@@ -279,10 +273,10 @@ function handleCancel(row) {
     message("撤回成功", {
       type: "success"
     });
-    onSearch();
+    getList();
+    console.log(row.release_status);
   });
 }
-
 const handleUpdate = row => {
   formRef.value.isUpdate = true;
   formRef.value.showDrawer = true;
@@ -297,7 +291,7 @@ const handleSelectionChange = val => {
 const handleCurrentChange = (val: number) => {
   pagination.currentPage = val;
   form.pageNum = pagination.currentPage;
-  onSearch();
+  getList();
 };
 
 const handleSortChange = column => {
@@ -348,11 +342,18 @@ function resetForm(formEl) {
 }
 
 async function onSearch() {
-  loading.value = true;
-  const { rows } = await listNew(form);
-  dataList.value = rows;
-  loading.value = false;
+  pagination.currentPage = 1;
+  form.pageNum = pagination.currentPage;
+  getList();
 }
+
+const getList = async () => {
+  loading.value = true;
+  const { rows, total } = await listNew(form);
+  dataList.value = rows;
+  pagination.total = total;
+  loading.value = false;
+};
 
 onMounted(() => {
   onSearch();

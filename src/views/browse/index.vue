@@ -32,10 +32,14 @@
         >
           重置
         </el-button>
+        <el-button @click="listExport()">导出</el-button>
       </el-form-item>
     </el-form>
 
-    <el-tabs type="border-card">
+    <el-tabs
+      type="border-card"
+      style="height: 770px; background-color: rgb(255 255 255)"
+    >
       <el-tab-pane label="表格">
         <PureTableBar
           title="文章列表"
@@ -47,7 +51,7 @@
             <pure-table
               ref="tableRef"
               border
-              align-whole="center"
+              align-whole="left"
               showOverflowTooltip
               :default-expand-all="true"
               :loading="loading"
@@ -66,12 +70,39 @@
       </el-tab-pane>
 
       <el-tab-pane label="图表">
-        <div id="chart" ref="chart" style="width: 600px; height: 400px" />
         <div
-          id="titleChart"
-          ref="titleChart"
-          style="width: 600px; height: 400px"
-        />
+          style="display: flex; justify-content: space-evenly; width: 1630px"
+        >
+          <el-card class="box-card">
+            <div
+              id="chart"
+              ref="chart"
+              :style="[
+                {
+                  width: width,
+                  height: height,
+                  display: 'flex',
+                  justifyContent: 'center'
+                }
+              ]"
+            />
+          </el-card>
+          <el-card
+            class="box-card"
+            :style="[
+              {
+                display: styleDisplay,
+                'align-items': styleAlignItems
+              }
+            ]"
+          >
+            <div
+              id="titleChart"
+              ref="titleChart"
+              style="width: 500px; height: 655px"
+            />
+          </el-card>
+        </div>
       </el-tab-pane>
     </el-tabs>
     <Form ref="formRef" @reload="onSearch" />
@@ -79,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import { listBrowse, listArticle } from "@/api/Browse/browse";
+import { listBrowse, listArticle, listExport } from "@/api/Browse/browse";
 import { onMounted, reactive, ref } from "vue";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
@@ -93,6 +124,16 @@ import Tree from "./tree.vue";
 defineOptions({
   name: "TypeArticle"
 });
+
+const styleTitleChart = reactive({
+  display: "flex",
+  alignItems: "center"
+});
+
+const styleDisplay = ref("flex");
+const styleAlignItems = ref("center");
+const width = ref("900px");
+const height = ref("655px");
 
 const dateRange = ref();
 
@@ -201,7 +242,7 @@ const handlerDatas = arr => {
             ? "门户及项目介绍"
             : item.articleType == "2"
             ? "成果内容展示"
-            : "未分类"
+            : "对外服务"
       };
     }
   );
@@ -215,10 +256,12 @@ async function onSearch() {
 
   dataList.value = rows;
   loading.value = false;
-  // console.log(rows);
+  console.log(rows);
   handlerDatas(dataList.value); //调用数据分组方法
-  renderChart();
-  titleChart();
+  setTimeout(() => {
+    renderChart();
+    titleChart();
+  }, 200);
 }
 
 const SearchData = async (dateRange?) => {
@@ -244,6 +287,7 @@ function renderChart() {
   // 创建柱形图
   const chartDom = document.getElementById("chart");
   const myChart = echarts.init(chartDom);
+
   // let option: EChartsOption;
 
   interface DataItem {
@@ -268,18 +312,49 @@ function renderChart() {
   });
 
   const newData = arr.map(({ value, groupId }) => ({ value, groupId }));
-  console.log(newData);
+  // console.log(newData);
 
   const option = {
+    // width: 800,
+    title: {
+      text: "栏目总浏览次数统计",
+      subtext: "",
+      left: "center"
+    },
+    dataZoom: [
+      {
+        type: "inside",
+        moveOnMouseWheel: true,
+        show: false,
+        start: 0,
+        end: 100,
+        xAxisIndex: [0],
+        zoomOnMouseWheel: false
+      },
+      {
+        type: "slider",
+        show: false,
+        start: 0,
+        end: 100,
+        xAxisIndex: [0],
+        height: 0
+      }
+    ],
     xAxis: {
+      name: "栏目名称",
       type: "category",
-      data: ["新闻信息", "门户及项目介绍", "成果内容展示"],
+      data: ["新闻信息", "门户及项目介绍", "成果内容展示", "对外服务"],
       axisLabel: {
-        fontSize: 9,
+        fontSize: 14,
         interval: 0,
-        rotate: 30,
-        formatter: function () {
-          return "";
+        // rotate: 15,
+        formatter: function (value) {
+          // const len = value.length;
+          // if (len > 4) {
+          //   return value.substring(0, 4) + "...";
+          // } else {
+          return value;
+          // }
         }
       }
     },
@@ -290,69 +365,102 @@ function renderChart() {
         type: "shadow"
       }
     },
-    yAxis: {},
+    yAxis: {
+      name: "浏览次数",
+      nameTextStyle: {
+        padding: [0, 0, 0, -100]
+      }
+      // nameRotate:'90'
+    },
     dataGroupId: "",
     animationDurationUpdate: 500,
     series: {
       type: "bar",
       id: "sales",
+      barWidth: 35,
+      silent: false,
       data: newData as DataItem[],
       universalTransition: {
         enabled: true,
         divideShape: "clone"
+      },
+      label: {
+        show: true,
+        position: "top"
       }
     }
+    // grid: {
+    //   width: "700px"
+    // }
   };
-
-  // const drilldownData = [
-  //   {
-  //     dataGroupId: "animals",
-  //     data: [
-  //       ["Cats", 4],
-  //       ["Dogs", 2],
-  //       ["Cows", 1],
-  //       ["Sheep", 2],
-  //       ["Pigs", 3]
-  //     ]
-  //   },
-  //   {
-  //     dataGroupId: "fruits",
-  //     data: [
-  //       ["Apples", 4],
-  //       ["Oranges", 2]
-  //     ]
-  //   },
-  //   {
-  //     dataGroupId: "cars",
-  //     data: [
-  //       ["Toyota", 4],
-  //       ["Opel", 2],
-  //       ["Volkswagen", 2]
-  //     ]
-  //   }
-  // ];
 
   console.log(arr);
   const drilldownData = arr;
 
   myChart.on("click", function (event) {
+    //隐藏饼状图
+    styleDisplay.value == "none"
+      ? (styleDisplay.value = "flex")
+      : (styleDisplay.value = "none");
+
+    width.value == "1400px"
+      ? (width.value = "900px")
+      : (width.value = "1400px");
+
     if (event.data) {
       const subData = drilldownData.find(function (data) {
         return data.dataGroupId === (event.data as DataItem).groupId;
       });
+
+      console.log(subData.dataGroupId);
+
+      let dataZoomEnd = 0;
+      subData.data.length > 35 ? (dataZoomEnd = 15) : (dataZoomEnd = 100);
+
       if (!subData) {
         return;
       }
       myChart.setOption<echarts.EChartsOption>({
+        title: {
+          text: subData.dataGroupId + "：文章浏览次数统计",
+          subtext: "栏目下共有" + subData.data.length + "篇文章",
+          left: "center"
+        },
+        // grid: {
+        //   width:'1300px',
+        //   containLabel: true
+        // },
         xAxis: {
+          name: "",
           data: subData.data.map(function (item) {
             return item[0];
-          })
+          }),
+          axisLabel: {
+            fontSize: 10,
+            interval: 0,
+            // rotate: 15,
+            // formatter: function (value) {
+            //   return "";
+            // }
+            formatter: function (value) {
+              const len = value.length;
+              if (len > 4) {
+                return value.substring(0, 4) + "...";
+              } else {
+                return value;
+              }
+            }
+          }
         },
         series: {
           type: "bar",
           id: "sales",
+          barWidth: 30,
+          silent: true,
           dataGroupId: subData.dataGroupId,
+          label: {
+            show: false
+          },
           data: subData.data.map(function (item) {
             return item[1];
           }),
@@ -364,20 +472,41 @@ function renderChart() {
         graphic: [
           {
             type: "text",
-            left: 50,
-            top: 20,
+            left: 0,
+            top: 0,
             style: {
-              text: "Back",
+              text: "返回",
               fontSize: 18
             },
-            onclick: function () {
+            onclick: function (e) {
+              e.target.style.text = "";
               myChart.setOption(option);
             }
+          }
+        ],
+        dataZoom: [
+          {
+            type: "inside",
+            moveOnMouseWheel: true,
+            zoomOnMouseWheel: false,
+            show: true,
+            start: 0,
+            end: dataZoomEnd,
+            xAxisIndex: [0]
+          },
+          {
+            type: "slider",
+            height: 0,
+            show: true,
+            start: 0,
+            end: dataZoomEnd,
+            xAxisIndex: [0]
           }
         ]
       });
     }
   });
+
   option && myChart.setOption(option);
 }
 
@@ -385,68 +514,69 @@ function titleChart() {
   const chart = document.getElementById("titleChart");
   const titleChart = echarts.init(chart);
 
+  const arr = listArticleData.handlerList.map(({ articleType, viewCount }) => ({
+    articleType,
+    viewCount
+  }));
+  const data = arr.map(item => {
+    return {
+      value: item.viewCount,
+      name: item.articleType
+    };
+  });
+
+  console.log(data);
+
   const options = {
     title: {
-      text: "Stacked Line"
+      text: "栏目总浏览次数占比",
+      left: "center"
+      // top: 0
     },
     tooltip: {
-      trigger: "axis"
+      trigger: "item"
     },
     legend: {
-      data: ["Email", "Union Ads", "Video Ads", "Direct", "Search Engine"]
-    },
-    grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
-      containLabel: true
-    },
-    toolbox: {
-      feature: {
-        saveAsImage: {}
-      }
-    },
-    xAxis: {
-      type: "category",
-      boundaryGap: false,
-      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    },
-    yAxis: {
-      type: "value"
+      orient: "horizontal",
+      y: "bottom"
     },
     series: [
       {
-        name: "Email",
-        type: "line",
-        stack: "Total",
-        data: [120, 132, 101, 134, 90, 230, 210]
-      },
-      {
-        name: "Union Ads",
-        type: "line",
-        stack: "Total",
-        data: [220, 182, 191, 234, 290, 330, 310]
-      },
-      {
-        name: "Video Ads",
-        type: "line",
-        stack: "Total",
-        data: [150, 232, 201, 154, 190, 330, 410]
-      },
-      {
-        name: "Direct",
-        type: "line",
-        stack: "Total",
-        data: [320, 332, 301, 334, 390, 330, 320]
-      },
-      {
-        name: "Search Engine",
-        type: "line",
-        stack: "Total",
-        data: [820, 932, 901, 934, 1290, 1330, 1320]
+        name: "Access From",
+        type: "pie",
+        radius: ["35%", "65%"],
+        data: data,
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: "rgba(0, 0, 0, 0.5)"
+          }
+        },
+        labelLine: {
+          length: 55, // 修改引导线第一段的长度
+          length2: 25 // 修改引导线第二段的长度
+        }
       }
-    ]
+    ],
+    label: {
+      formatter: "{b}：{d}%"
+    },
+    graphic: {
+      type: "text",
+      left: "center",
+      top: "middle",
+      style: {
+        text: "总浏览次数：",
+        fontSize: 16
+      }
+    }
   };
+
+  let total = 0;
+  options.series[0].data.forEach(item => [(total += item.value)]);
+
+  options.graphic.style.text += total;
 
   options && titleChart.setOption(options);
 }

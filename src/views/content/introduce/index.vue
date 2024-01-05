@@ -81,6 +81,8 @@
           :size="size"
           :data="dataList"
           :columns="dynamicColumns"
+          :pagination="pagination"
+          :paginationSmall="size === 'small'"
           :header-cell-style="{
             background: 'var(--el-table-row-hover-bg-color)',
             color: 'var(--el-text-color-primary)'
@@ -148,7 +150,7 @@
         </pure-table>
       </template>
     </PureTableBar>
-    <Form ref="formRef" @reload="onSearch" />
+    <Form ref="formRef" @reload="getList" />
   </div>
 </template>
 <script setup lang="ts">
@@ -172,7 +174,7 @@ import { message } from "@/utils/message";
 import { delPortal, listPortal, releasePortal } from "@/api/content/portal";
 import { PaginationProps } from "@pureadmin/table";
 import { ElMessageBox } from "element-plus";
-import { delNew } from "@/api/content/new";
+import { delNew, listNew } from "@/api/content/new";
 
 defineOptions({
   name: "Portal"
@@ -349,13 +351,20 @@ function resetForm(formEl) {
 }
 
 async function onSearch() {
-  loading.value = true;
-  const { rows } = await listPortal(form);
-  dataList.value = rows;
-  loading.value = false;
+  pagination.currentPage = 1;
+  form.pageNum = pagination.currentPage;
+  getList();
 }
 
+const getList = async () => {
+  loading.value = true;
+  const { rows, total } = await listPortal(form);
+  dataList.value = rows;
+  pagination.total = total;
+  loading.value = false;
+};
+
 onMounted(() => {
-  onSearch();
+  getList();
 });
 </script>
