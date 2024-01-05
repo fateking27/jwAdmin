@@ -3,7 +3,7 @@
     v-model="showDrawer"
     :title="!isUpdate ? '新增成果内容' : '编辑成果内容'"
     :before-close="handleDrawerClose"
-    size="520px"
+    size="620px"
   >
     <el-form label-width="110px" ref="resultRef" :rules="rules" :model="form">
       <el-form-item label="分级" prop="rank">
@@ -20,6 +20,7 @@
           maxlength="120"
         />
       </el-form-item>
+
       <el-form-item label="现状" prop="ecologicalStatus">
         <el-input
           v-model="form.ecologicalStatus"
@@ -27,6 +28,36 @@
           maxlength="120"
         />
       </el-form-item>
+
+      <el-form-item label="图片选择" prop="achievementMaterialUrlArr">
+        <!-- 添加筛选 -->
+        <el-select
+          filterable
+          clearable
+          multiple
+          v-model="form.achievementMaterialUrlArr"
+          placeholder="请选择图片"
+          @change="
+            e => {
+              console.log(e);
+            }
+          "
+        >
+          <el-option-group
+            v-for="group in options"
+            :key="group.name"
+            :label="group.name"
+          >
+            <el-option
+              v-for="item in group.list"
+              :key="item.id"
+              :label="item.title"
+              :value="item.url"
+            />
+          </el-option-group>
+        </el-select>
+      </el-form-item>
+
       <el-form-item>
         <el-button
           type="primary"
@@ -42,14 +73,23 @@
 
 <script setup lang="ts">
 import { FormInstance } from "element-plus";
-import { ref, reactive, toRefs } from "vue";
+import { ref, reactive, toRefs, onMounted } from "vue";
 import { message } from "@/utils/message";
 
 import { addCurrent, updateResult, getResult } from "@/api/content/result";
+import { NewImg } from "@/api/content/new";
 const resultRef = ref();
 const loading = ref(false);
 //const deptOptions = ref([]);
 const showDrawer = ref(false);
+let options = [];
+
+//获取素材图片
+const getNewImg = async () => {
+  const res = await NewImg();
+  console.log(res);
+  options = res.data;
+};
 
 const data = reactive({
   form: {} as any,
@@ -78,7 +118,8 @@ const reset = () => {
     release_status: undefined,
     ecologicalStatus: undefined,
     disasterReduction: undefined,
-    rank: undefined
+    rank: undefined,
+    achievementMaterialUrlArr: undefined
   };
   if (resultRef.value?.resetFields) {
     resultRef.value.resetFields();
@@ -145,6 +186,10 @@ const setData = async row => {
     });
   }
 };
+
+onMounted(() => {
+  getNewImg();
+});
 
 defineExpose({ showDrawer, isUpdate, setData });
 </script>

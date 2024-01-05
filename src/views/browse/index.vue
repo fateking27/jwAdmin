@@ -258,10 +258,8 @@ async function onSearch() {
   loading.value = false;
   console.log(rows);
   handlerDatas(dataList.value); //调用数据分组方法
-  setTimeout(() => {
-    renderChart();
-    titleChart();
-  }, 200);
+  renderChart();
+  titleChart();
 }
 
 const SearchData = async (dateRange?) => {
@@ -534,7 +532,8 @@ function titleChart() {
       // top: 0
     },
     tooltip: {
-      trigger: "item"
+      trigger: "item",
+      formatter: "{a} {b} : {c} ({d}%)"
     },
     legend: {
       orient: "horizontal",
@@ -542,7 +541,7 @@ function titleChart() {
     },
     series: [
       {
-        name: "Access From",
+        name: "",
         type: "pie",
         radius: ["35%", "65%"],
         data: data,
