@@ -48,12 +48,13 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { computed, onUnmounted, reactive, ref } from "vue";
 import "@wangeditor/editor/dist/css/style.css";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import { Boot, IDomEditor, IToolbarConfig } from "@wangeditor/editor";
 import MaterialMenu from "@/components/SuperEditor/MaterialMenu";
 import { getMaterialTree } from "@/api/wjx/material";
+
 const { VITE_API_PATH } = import.meta.env;
 const editorRef = ref();
 const mode = ref("default");
