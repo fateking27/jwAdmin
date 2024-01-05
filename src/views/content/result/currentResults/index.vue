@@ -115,7 +115,13 @@
               type="primary"
               :size="size"
               :icon="useRenderIcon(EditPen)"
-              @click="handleUpdate(row)"
+              @click="
+                () => {
+                  const arr = row.achievementMaterialUrl?.split('?');
+                  handleUpdate({ ...row, achievementMaterialUrlArr: arr }),
+                    console.log({ ...row, achievementMaterialUrlArr: arr });
+                }
+              "
               v-if="hasAuth(['system:dept:edit'])"
             >
               修改
@@ -255,6 +261,7 @@ function handleCancel(row) {
 }
 
 const handleUpdate = row => {
+  console.log(row);
   formRef.value.isUpdate = true;
   formRef.value.setData(row);
   formRef.value.showDrawer = true;

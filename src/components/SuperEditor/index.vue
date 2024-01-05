@@ -48,12 +48,13 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { computed, onUnmounted, reactive, ref } from "vue";
 import "@wangeditor/editor/dist/css/style.css";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import { Boot, IDomEditor, IToolbarConfig } from "@wangeditor/editor";
 import MaterialMenu from "@/components/SuperEditor/MaterialMenu";
 import { getMaterialTree } from "@/api/wjx/material";
+
 const { VITE_API_PATH } = import.meta.env;
 const editorRef = ref();
 const mode = ref("default");
@@ -72,7 +73,6 @@ const handleCreated = async editor => {
   await initMaterialTree();
   initMaterialMenuEvent();
 };
-
 const registerMenu = (
   editor: IDomEditor,
   toolbarConfig: Partial<IToolbarConfig>
@@ -122,6 +122,7 @@ const content = computed({
 const submitMaterial = () => {
   if (form.materialId) {
     const material = materialMap.get(form.materialId);
+    debugger
     if (material) {
       if (material.type == "0") {
         editorRef.value.insertNode({

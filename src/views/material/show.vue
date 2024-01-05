@@ -2,7 +2,8 @@
   <div>
     <el-dialog
       v-model="dialogVisible"
-      title="Tips"
+      v-if="dialogVisible"
+      title="素材预览"
       width="60%"
       :before-close="handleClose"
     >
@@ -22,7 +23,9 @@
           <video :src="data.file.url" autoplay />
         </div>
         <div v-if="data.type === '2'">
-          <audio-player ref="audioRef" :fileurl="data.file.url" />
+          <audio controls autoplay>
+            <source :src="data.file.url" />
+          </audio>
         </div>
       </div>
       <template #footer>
@@ -34,16 +37,18 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onUnmounted, ref } from "vue";
+import { ref } from "vue";
 import { Picture as IconPicture } from "@element-plus/icons-vue";
-import AudioPlayer from "./audio.vue";
 const dialogVisible = ref(false);
 const data = ref();
-const audioRef = ref();
 const showMaterial = async row => {
   data.value = row;
   dialogVisible.value = true;
   console.log(data.value);
+};
+
+const handleClose = () => {
+  dialogVisible.value=false;
 };
 
 defineExpose({ showMaterial });
