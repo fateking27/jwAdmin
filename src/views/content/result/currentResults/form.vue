@@ -39,7 +39,7 @@
           placeholder="请选择图片"
           @change="
             e => {
-              console.log(e);
+              console.log(form);
             }
           "
         >

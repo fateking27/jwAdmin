@@ -20,7 +20,7 @@ export const newCount = (data?: object) => {
 
 /**查询筛选条件后的日浏览量数据**/
 export const listArticle = (data?: object) => {
-  return http.request<Result>("get", "/business/browse/list", {
+  return http.request<Result>("get", "/business/browse/treeList", {
     params: data
   });
 };
