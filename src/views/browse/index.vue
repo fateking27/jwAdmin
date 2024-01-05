@@ -56,13 +56,13 @@
               :default-expand-all="true"
               :loading="loading"
               :size="size"
-              :data="listArticleData.handlerList"
+              :data="dataList"
               :columns="dynamicColumns"
               :header-cell-style="{
                 background: 'var(--el-table-row-hover-bg-color)',
                 color: 'var(--el-text-color-primary)'
               }"
-              row-key="TypeId"
+              row-key="articleType"
               adaptive
             />
           </template>
@@ -181,6 +181,7 @@ const columns: TableColumnList = [
     slot: "type"
   }
 ];
+
 const handleUpdate = row => {
   formRef.value.isUpdate = true;
   formRef.value.setData(row);
@@ -194,70 +195,112 @@ function resetForm(formEl) {
 }
 
 //按类型分组后的数据
-const listArticleData = reactive({
-  handlerList: []
-});
+// const listArticleData = reactive({
+//   handlerList: []
+// });
 
 // 相同类型数据整合
-const handlerDatas = arr => {
-  const obj = {};
-  arr.forEach((item, index) => {
-    const { articleType } = item; //解构赋值
+// const handlerDatas = arr => {
+//   const obj = {};
+//   arr.forEach((item, index) => {
+//     const { articleType } = item; //解构赋值
 
-    if (!obj[articleType]) {
-      obj[articleType] = {
-        articleType,
-        children: []
-      };
-    }
-    obj[articleType].children.push(item);
-  });
-  listArticleData.handlerList = Object.values(obj);
+//     if (!obj[articleType]) {
+//       obj[articleType] = {
+//         articleType,
+//         children: []
+//       };
+//     }
+//     obj[articleType].children.push(item);
+//   });
+//   listArticleData.handlerList = Object.values(obj);
 
-  //给分组后的数据添加而外属性
-  listArticleData.handlerList = listArticleData.handlerList.map(
-    (item, index) => {
-      let sum = 0;
-      item.children.forEach(item => {
-        item.articleType =
-          item.articleType == "0"
-            ? ""
-            : item.articleType == "1"
-            ? ""
-            : item.articleType == "2"
-            ? ""
-            : "";
-        sum += item.viewCount;
-      }); //计算总浏览量
+//   //给分组后的数据添加而外属性
+//   // listArticleData.handlerList = listArticleData.handlerList.map(
+//   //   (item, index) => {
+//   //     let sum = 0;
+//   //     item.children.forEach(item => {
+//   //       item.articleType =
+//   //         item.articleType == "0"
+//   //           ? ""
+//   //           : item.articleType == "1"
+//   //           ? ""
+//   //           : item.articleType == "2"
+//   //           ? ""
+//   //           : "";
+//   //       sum += item.viewCount;
+//   //     }); //计算总浏览量
 
-      return {
-        ...item,
-        TypeId: index + 1,
-        viewCount: sum,
-        title: ". . .",
-        articleType:
-          item.articleType == "0"
-            ? "新闻信息"
-            : item.articleType == "1"
-            ? "门户及项目介绍"
-            : item.articleType == "2"
-            ? "成果内容展示"
-            : "对外服务"
-      };
-    }
-  );
-  // console.log(listArticleData.handlerList);
-};
+//   //     return {
+//   //       ...item,
+//   //       TypeId: index + 1,
+//   //       viewCount: sum,
+//   //       title: ". . .",
+//   //       articleType:
+//   //         item.articleType == "0"
+//   //           ? "新闻信息"
+//   //           : item.articleType == "1"
+//   //           ? "门户及项目介绍"
+//   //           : item.articleType == "2"
+//   //           ? "成果内容展示"
+//   //           : "对外服务"
+//   //     };
+//   //   }
+//   // );
+//   // console.log(listArticleData.handlerList);
+// };
 
 async function onSearch() {
   loading.value = true;
   //获取近一个月的新闻信息
-  const { rows } = await listArticle();
+  const { data } = await listArticle();
 
-  dataList.value = rows;
   loading.value = false;
-  console.log(rows);
-  handlerDatas(dataList.value); //调用数据分组方法
+  console.log(data);
+  // handlerDatas(dataList.value); //调用数据分组方法
+
+  let arrObj = [];
+  for (const key in data) {
+    const name =
+      key == "0"
+        ? "新闻信息"
+        : key == "1"
+        ? "门户及项目介绍"
+        : key == "2"
+        ? "成果内容展示"
+        : "对外服务";
+    const i = { articleType: name, children: data[key] };
+    arrObj.push(i);
+  }
+
+  arrObj = arrObj.map(item => {
+    const children = [];
+    for (const key in item.children) {
+      const i = item.children[key];
+      children.push(i);
+    }
+    return {
+      ...item,
+      children: children
+    };
+  });
+
+  //给分组后的数据添加而外属性
+  arrObj = arrObj.map((item, index) => {
+    let sum = 0;
+    item.children.forEach(item => {
+      sum += item.viewCount;
+    }); //计算总浏览量
+
+    return {
+      ...item,
+      TypeId: index + 1,
+      viewCount: sum,
+      title: ". . ."
+    };
+  });
+  dataList.value = arrObj;
+  console.log(dataList.value);
   renderChart();
   titleChart();
 }
@@ -294,7 +337,7 @@ function renderChart() {
   }
 
   //数据处理
-  const arr = listArticleData.handlerList.map(item => {
+  const arr = dataList.value.map(item => {
     const data = item.children.map(({ title, viewCount }) => ({
       title,
       viewCount
@@ -511,8 +554,9 @@ function renderChart() {
 function titleChart() {
   const chart = document.getElementById("titleChart");
   const titleChart = echarts.init(chart);
+  // console.log(dataList.value)
 
-  const arr = listArticleData.handlerList.map(({ articleType, viewCount }) => ({
+  const arr = dataList.value.map(({ articleType, viewCount }) => ({
     articleType,
     viewCount
   }));
@@ -543,7 +587,7 @@ function titleChart() {
       {
         name: "",
         type: "pie",
-        radius: ["35%", "65%"],
+        radius: ["30%", "55%"],
         data: data,
         emphasis: {
           itemStyle: {
@@ -553,7 +597,7 @@ function titleChart() {
           }
         },
         labelLine: {
-          length: 55, // 修改引导线第一段的长度
+          length: 25, // 修改引导线第一段的长度
           length2: 25 // 修改引导线第二段的长度
         }
       }
