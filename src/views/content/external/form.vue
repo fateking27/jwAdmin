@@ -111,7 +111,7 @@ const reset = () => {
 const isUpdate = ref(false);
 
 const handleDrawerClose = () => {
-  reset();
+  // reset();
   showDrawer.value = false;
 };
 

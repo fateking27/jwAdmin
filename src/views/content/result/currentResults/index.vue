@@ -70,6 +70,8 @@
           :size="size"
           :data="dataList"
           :columns="dynamicColumns"
+          :pagination="pagination"
+          :paginationSmall="size === 'small'"
           :header-cell-style="{
             background: 'var(--el-table-row-hover-bg-color)',
             color: 'var(--el-text-color-primary)'
@@ -91,6 +93,7 @@
               @click="handlePublish(row)"
               :icon="useRenderIcon(Publish)"
               v-if="hasAuth(['system:dept:add'])"
+              :disabled="row.releaseStatus === '1'"
             >
               发布
             </el-button>
@@ -102,6 +105,7 @@
               @click="handleCancel(row)"
               :icon="useRenderIcon(Cancel)"
               v-if="hasAuth(['system:dept:add'])"
+              :disabled="row.releaseStatus === '0'"
             >
               撤销
             </el-button>
@@ -152,9 +156,6 @@ import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
 import Publish from "@iconify-icons/ep/document";
 import Cancel from "@iconify-icons/ep/circle-close";
-import dayjs from "dayjs";
-import { handleTree } from "@/utils/tree";
-import { useDict } from "@/utils/useDict";
 import Form from "./form.vue";
 import { hasAuth } from "@/router/utils";
 import { message } from "@/utils/message";
@@ -164,10 +165,8 @@ import {
   releaseResult,
   updateResult
 } from "@/api/content/result";
-import { listPost } from "@/api/system/post";
 import { PaginationProps } from "@pureadmin/table";
 import { ElMessageBox } from "element-plus";
-import { delNew } from "@/api/content/new";
 
 defineOptions({
   name: "currentResults"
@@ -236,7 +235,7 @@ const handleAdd = row => {
 };
 
 function handlePublish(row) {
-  row.release_status = 1;
+  row.releaseStatus = 1;
   releaseResult(row.id).then(() => {
     message("发布成功", {
       type: "success"
@@ -246,7 +245,7 @@ function handlePublish(row) {
 }
 
 function handleCancel(row) {
-  row.release_status = 0;
+  row.releaseStatus = 0;
   releaseResult(row.id).then(() => {
     message("撤回成功", {
       type: "success"
@@ -269,7 +268,7 @@ const handleSelectionChange = val => {
 const handleCurrentChange = (val: number) => {
   pagination.currentPage = val;
   form.pageNum = pagination.currentPage;
-  onSearch();
+  getList();
 };
 
 const handleSortChange = column => {
@@ -320,11 +319,18 @@ function resetForm(formEl) {
 }
 
 async function onSearch() {
-  loading.value = true;
-  const { rows } = await listCurrent(form);
-  dataList.value = rows;
-  loading.value = false;
+  pagination.currentPage = 1;
+  form.pageNum = pagination.currentPage;
+  getList();
 }
+
+const getList = async () => {
+  loading.value = true;
+  const { rows, total } = await listCurrent(form);
+  dataList.value = rows;
+  pagination.total = total;
+  loading.value = false;
+};
 
 onMounted(() => {
   onSearch();

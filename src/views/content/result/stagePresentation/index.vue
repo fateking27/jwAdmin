@@ -70,6 +70,8 @@
           :size="size"
           :data="dataList"
           :columns="dynamicColumns"
+          :pagination="pagination"
+          :paginationSmall="size === 'small'"
           :header-cell-style="{
             background: 'var(--el-table-row-hover-bg-color)',
             color: 'var(--el-text-color-primary)'
@@ -83,6 +85,30 @@
         >
           <!--          <template #status="{ row }"></template>-->
           <template #operation="{ row }">
+            <el-button
+              class="reset-margin"
+              link
+              type="primary"
+              :size="size"
+              @click="handlePublish(row)"
+              :icon="useRenderIcon(Publish)"
+              v-if="hasAuth(['system:dept:add'])"
+              :disabled="row.releaseStatus === '1'"
+            >
+              发布
+            </el-button>
+            <el-button
+              class="reset-margin"
+              link
+              type="primary"
+              :size="size"
+              @click="handleCancel(row)"
+              :icon="useRenderIcon(Cancel)"
+              v-if="hasAuth(['system:dept:add'])"
+              :disabled="row.releaseStatus === '0'"
+            >
+              撤销
+            </el-button>
             <el-button
               class="reset-margin"
               link
@@ -120,7 +146,8 @@
 </template>
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
-
+import Publish from "@iconify-icons/ep/document";
+import Cancel from "@iconify-icons/ep/circle-close";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import Delete from "@iconify-icons/ep/delete";
@@ -128,16 +155,14 @@ import EditPen from "@iconify-icons/ep/edit-pen";
 import Search from "@iconify-icons/ep/search";
 import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
-import Publish from "@iconify-icons/ep/document";
-import Cancel from "@iconify-icons/ep/circle-close";
-import dayjs from "dayjs";
-import { useDict } from "@/utils/useDict";
 import Form from "./form.vue";
 import { hasAuth } from "@/router/utils";
 import { message } from "@/utils/message";
 import { delResult, listPage } from "@/api/content/result";
 import { PaginationProps } from "@pureadmin/table";
 import { ElMessageBox } from "element-plus";
+import { releaseResult } from "@/api/content/result";
+import { releasePortal } from "@/api/content/portal";
 
 defineOptions({
   name: "stagePresentation"
@@ -190,18 +215,18 @@ const columns: TableColumnList = [
   {
     label: "阶段时间",
     prop: "stageTime",
-    width: 120
+    width: 250
+  },
+  {
+    label: "发布时间",
+    prop: "releaseTime",
+    width: 250,
+    slot: "type"
   },
   {
     label: "来源",
     prop: "source",
     width: 200
-  },
-  {
-    label: "阶段时间",
-    prop: "releaseTime",
-    width: 250,
-    slot: "type"
   },
   {
     label: "作者",
@@ -215,6 +240,26 @@ const columns: TableColumnList = [
     slot: "operation"
   }
 ];
+
+function handlePublish(row) {
+  row.releaseStatus = 1;
+  releaseResult(row.id).then(() => {
+    message("发布成功", {
+      type: "success"
+    });
+    onSearch();
+  });
+}
+
+function handleCancel(row) {
+  row.releaseStatus = 0;
+  releaseResult(row.id).then(() => {
+    message("撤回成功", {
+      type: "success"
+    });
+    onSearch();
+  });
+}
 
 const handleAdd = row => {
   formRef.value.isUpdate = false;
@@ -287,11 +332,18 @@ function resetForm(formEl) {
 }
 
 async function onSearch() {
-  loading.value = true;
-  const { rows } = await listPage(form);
-  dataList.value = rows;
-  loading.value = false;
+  pagination.currentPage = 1;
+  form.pageNum = pagination.currentPage;
+  getList();
 }
+
+const getList = async () => {
+  loading.value = true;
+  const { rows, total } = await listPage(form);
+  dataList.value = rows;
+  pagination.total = total;
+  loading.value = false;
+};
 
 onMounted(() => {
   onSearch();

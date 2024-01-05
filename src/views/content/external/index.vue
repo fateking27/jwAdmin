@@ -92,7 +92,7 @@
               @click="handlePublish(row)"
               :icon="useRenderIcon(Publish)"
               v-if="hasAuth(['system:dept:add'])"
-              :disabled="row.releaseStatus == '1'"
+              :disabled="row.releaseStatus === '1'"
             >
               发布
             </el-button>
@@ -104,7 +104,7 @@
               @click="handleCancel(row)"
               :icon="useRenderIcon(Cancel)"
               v-if="hasAuth(['system:dept:add'])"
-              :disabled="row.releaseStatus == '0'"
+              :disabled="row.releaseStatus === '0'"
             >
               撤销
             </el-button>
@@ -253,7 +253,7 @@ const handleAdd = row => {
 };
 
 function handlePublish(row) {
-  row.release_status = 1;
+  row.releaseStatus = 1;
   releaseExternal(row.id).then(() => {
     message("发布成功", {
       type: "success"
@@ -263,7 +263,7 @@ function handlePublish(row) {
 }
 
 function handleCancel(row) {
-  row.release_status = 0;
+  row.releaseStatus = 0;
   releaseExternal(row.id).then(() => {
     message("撤回成功", {
       type: "success"

@@ -68,5 +68,5 @@ export const delResult = ids => {
 
 /**发布项目成果**/
 export const releaseResult = id => {
-  return http.request<Result>("put", `/business/project_res/release/{id}`);
+  return http.request<Result>("put", `/business/project_res/release/${id}`);
 };
