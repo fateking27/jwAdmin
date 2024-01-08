@@ -93,6 +93,10 @@
           @selection-change="handleSelectionChange"
           @sort-change="handleSortChange"
         >
+          <template #content="{ row }">
+            <div v-html="row.content" />
+          </template>
+
           <template #operation="{ row }">
             <el-button
               class="reset-margin"
@@ -117,6 +121,17 @@
               v-if="hasAuth(['system:dept:add'])"
             >
               撤销
+            </el-button>
+            <el-button
+              class="reset-margin"
+              link
+              type="primary"
+              :size="size"
+              @click="handleSee(row)"
+              :icon="useRenderIcon(View)"
+              v-if="hasAuth(['system:dept:add'])"
+            >
+              查看
             </el-button>
             <el-button
               class="reset-margin"
@@ -151,6 +166,7 @@
       </template>
     </PureTableBar>
     <Form ref="formRef" @reload="getList" />
+    <Show ref="showRef" />
   </div>
 </template>
 <script setup lang="ts">
@@ -164,16 +180,15 @@ import Search from "@iconify-icons/ep/search";
 import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
 import Publish from "@iconify-icons/ep/document";
+import View from "@iconify-icons/ep/view";
 import Cancel from "@iconify-icons/ep/circle-close";
 import Form from "./form.vue";
 import { hasAuth } from "@/router/utils";
 import { message } from "@/utils/message";
-import { delNew, listNew, releaseNew, updateNew } from "@/api/content/new";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { listPost } from "@/api/system/post";
+import { delNew, listNew, releaseNew, getNew } from "@/api/content/new";
 import { ElMessageBox } from "element-plus";
-import { cleanOperlog, delOperlog } from "@/api/system/monitor/operlog";
 import { PaginationProps } from "@pureadmin/table";
+import Show from "./show.vue";
 
 defineOptions({
   name: "New"
@@ -215,7 +230,7 @@ const columns: TableColumnList = [
     label: "新闻名称",
     prop: "name",
     align: "left",
-    minWidth: 120
+    minWidth: 100
   },
   {
     label: "新闻摘要",
@@ -225,18 +240,18 @@ const columns: TableColumnList = [
   {
     label: "新闻类别",
     prop: "type",
-    width: 120,
+    width: 100,
     slot: "type"
   },
   {
     label: "新闻标签",
     prop: "mark",
-    width: 120
+    width: 100
   },
   {
     label: "作者",
     prop: "author",
-    width: 120
+    width: 100
   },
   {
     label: "来源",
@@ -246,15 +261,25 @@ const columns: TableColumnList = [
   {
     label: "新闻内容",
     prop: "content",
-    width: 120
+    width: 280,
+    slot: "content"
   },
   {
     label: "操作",
     fixed: "right",
-    width: 330,
     slot: "operation"
   }
 ];
+
+const { VITE_API_PATH } = import.meta.env;
+const showRef = ref();
+const handleSee = async row => {
+  //先根据文件id查询文件详细信息
+  const res = await getNew(row.id);
+  row.value = res.data;
+  row.value.coverMaterialUrl = `${VITE_API_PATH}/static/${res.data.coverMaterialUrl}`;
+  await showRef.value.showNew(row);
+};
 
 const handleAdd = row => {
   formRef.value.isUpdate = false;

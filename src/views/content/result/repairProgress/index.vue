@@ -114,6 +114,17 @@
               link
               type="primary"
               :size="size"
+              @click="handleSee(row)"
+              :icon="useRenderIcon(View)"
+              v-if="hasAuth(['system:dept:add'])"
+            >
+              查看
+            </el-button>
+            <el-button
+              class="reset-margin"
+              link
+              type="primary"
+              :size="size"
               :icon="useRenderIcon(EditPen)"
               @click="handleUpdate(row)"
               v-if="hasAuth(['system:dept:edit'])"
@@ -142,6 +153,7 @@
       </template>
     </PureTableBar>
     <Form ref="formRef" @reload="onSearch" />
+    <Show ref="showRef" />
   </div>
 </template>
 <script setup lang="ts">
@@ -155,13 +167,20 @@ import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
 import Publish from "@iconify-icons/ep/document";
 import Cancel from "@iconify-icons/ep/circle-close";
-import dayjs from "dayjs";
+import View from "@iconify-icons/ep/view";
 import Form from "./form.vue";
+import Show from "./show.vue";
 import { hasAuth } from "@/router/utils";
 import { message } from "@/utils/message";
-import { delResult, listProgress, releaseResult } from "@/api/content/result";
+import {
+  delResult,
+  getResult,
+  listProgress,
+  releaseResult
+} from "@/api/content/result";
 import { PaginationProps } from "@pureadmin/table";
 import { ElMessageBox } from "element-plus";
+import { getPortal } from "@/api/content/portal";
 
 defineOptions({
   name: "repairProgress"
@@ -229,6 +248,16 @@ const columns: TableColumnList = [
     slot: "operation"
   }
 ];
+
+const { VITE_API_PATH } = import.meta.env;
+const showRef = ref();
+const handleSee = async row => {
+  //先根据文件id查询文件详细信息
+  const res = await getResult(row.id);
+  row.value = res.data;
+  row.value.coverMaterialUrl = `${VITE_API_PATH}/static/${res.data.coverMaterialUrl}`;
+  await showRef.value.showProgress(row);
+};
 
 const handleAdd = row => {
   formRef.value.isUpdate = false;

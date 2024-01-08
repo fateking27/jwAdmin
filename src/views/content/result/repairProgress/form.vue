@@ -16,7 +16,7 @@
 
       <el-form-item
         style="display: none"
-        label="新闻封面Id"
+        label="文章封面Id"
         prop="coverMaterialId"
       >
         <el-input v-model="form.coverMaterialId" placeholder="" />

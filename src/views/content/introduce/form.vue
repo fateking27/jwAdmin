@@ -182,7 +182,7 @@ const getNewImg = async () => {
 };
 
 const handleDrawerClose = () => {
-  // reset();
+  reset();
   showDrawer.value = false;
 };
 

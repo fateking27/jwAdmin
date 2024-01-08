@@ -13,12 +13,8 @@
           maxlength="120"
         />
       </el-form-item>
-      <el-form-item label="功能" prop="disasterReduction">
-        <el-input
-          v-model="form.disasterReduction"
-          placeholder="请输入功能"
-          maxlength="120"
-        />
+      <el-form-item label="功能" prop="fun">
+        <el-input v-model="form.fun" placeholder="请输入功能" maxlength="120" />
       </el-form-item>
 
       <el-form-item label="现状" prop="ecologicalStatus">
@@ -95,10 +91,8 @@ const data = reactive({
   form: {} as any,
   rules: {
     rank: [{ required: true, message: "分级不能为空", trigger: "blur" }],
-    disasterReduction: [
-      { required: true, message: "功能不能为空", trigger: "blur" }
-    ],
-    decologicalStatus: [
+    fun: [{ required: true, message: "功能不能为空", trigger: "blur" }],
+    ecologicalStatus: [
       { required: true, message: "现状不能为空", trigger: "blur" }
     ]
   }
@@ -117,7 +111,7 @@ const reset = () => {
     releaseTime: undefined,
     release_status: undefined,
     ecologicalStatus: undefined,
-    disasterReduction: undefined,
+    fun: undefined,
     rank: undefined,
     achievementMaterialUrlArr: undefined
   };
