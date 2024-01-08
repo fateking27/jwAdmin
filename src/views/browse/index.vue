@@ -314,14 +314,56 @@ const SearchData = async (dateRange?) => {
   }
   loading.value = true;
   console.log("beginDay:", dateRange[0], "endDay:", dateRange[1]);
-  const res = await listArticle({
+  const { data } = await listArticle({
     beginDay: dateRange[0],
     endDay: dateRange[1]
   });
-  dataList.value = res.rows;
-  handlerDatas(dataList.value); //调用数据分组方法
+  let arrObj = [];
+  for (const key in data) {
+    const name =
+      key == "0"
+        ? "新闻信息"
+        : key == "1"
+        ? "门户及项目介绍"
+        : key == "2"
+        ? "成果内容展示"
+        : "对外服务";
+    const i = { articleType: name, children: data[key] };
+    arrObj.push(i);
+  }
+
+  arrObj = arrObj.map(item => {
+    const children = [];
+    for (const key in item.children) {
+      const i = item.children[key];
+      children.push(i);
+    }
+    return {
+      ...item,
+      children: children
+    };
+  });
+
+  //给分组后的数据添加而外属性
+  arrObj = arrObj.map((item, index) => {
+    let sum = 0;
+    item.children.forEach(item => {
+      sum += item.viewCount;
+    }); //计算总浏览量
+
+    return {
+      ...item,
+      TypeId: index + 1,
+      viewCount: sum,
+      title: ". . ."
+    };
+  });
+
+  dataList.value = arrObj;
+  console.log(dataList.value);
+  // dataList.value = data;
+  // handlerDatas(dataList.value); //调用数据分组方法
   loading.value = false;
-  console.log("rows", res);
 };
 
 function renderChart() {

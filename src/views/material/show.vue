@@ -48,7 +48,7 @@ const showMaterial = async row => {
 };
 
 const handleClose = () => {
-  dialogVisible.value=false;
+  dialogVisible.value = false;
 };
 
 defineExpose({ showMaterial });

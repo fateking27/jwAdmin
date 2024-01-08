@@ -89,7 +89,7 @@ import { getFileInfo, uploadFile } from "@/api/wjx/file";
 import { addMaterial, updateMaterial } from "@/api/wjx/material";
 import { useDict } from "@/utils/useDict";
 import { Plus } from "@element-plus/icons-vue";
-import {cloneDeep} from "@pureadmin/utils";
+import { cloneDeep } from "@pureadmin/utils";
 
 const { VITE_API_PATH } = import.meta.env;
 const { sys_cover_status } = useDict("sys_cover_status");
