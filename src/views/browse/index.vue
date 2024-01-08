@@ -498,7 +498,7 @@ function renderChart() {
       console.log(subData.dataGroupId);
 
       let dataZoomEnd = 0;
-      subData.data.length > 35 ? (dataZoomEnd = 15) : (dataZoomEnd = 100);
+      subData.data.length > 10 ? (dataZoomEnd = 85) : (dataZoomEnd = 100);
 
       if (!subData) {
         return;
