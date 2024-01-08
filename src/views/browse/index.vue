@@ -7,7 +7,7 @@
       class="bg-bg_color w-[99/100] pl-8 pt-4"
     >
       <el-form-item>
-        <el-form-item label="发布时间">
+        <el-form-item label="时间">
           <el-date-picker
             v-model="dateRange"
             value-format="YYYY-MM-DD"

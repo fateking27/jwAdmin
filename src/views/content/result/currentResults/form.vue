@@ -119,7 +119,7 @@ const reset = () => {
     ecologicalStatus: undefined,
     disasterReduction: undefined,
     rank: undefined,
-    achievementMaterialUrlArr: undefined
+    achievementMaterialUrlArr: []
   };
   if (resultRef.value?.resetFields) {
     resultRef.value.resetFields();
