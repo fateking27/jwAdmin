@@ -83,7 +83,7 @@ let options = [];
 //获取素材图片
 const getNewImg = async () => {
   const res = await NewImg();
-  console.log(res);
+  // console.log(res);
   options = res.data;
 };
 
@@ -113,7 +113,7 @@ const reset = () => {
     ecologicalStatus: undefined,
     fun: undefined,
     rank: undefined,
-    achievementMaterialUrlArr: undefined
+    achievementMaterialUrlArr: []
   };
   if (resultRef.value?.resetFields) {
     resultRef.value.resetFields();
@@ -169,15 +169,20 @@ const emit = defineEmits<{
 }>();
 
 const setData = async row => {
+  // console.log(row)
   reset();
   if (!row) {
     isUpdate.value = false;
   } else {
     isUpdate.value = true;
     const id = row.id;
-    getResult(id).then(response => {
-      form.value = response.data;
-    });
+    // getResult(id).then(response => {
+    //   form.value = response.data;
+    //   console.log(response.data)
+    // });
+
+    //当前成果表单回显
+    form.value = row;
   }
 };
 

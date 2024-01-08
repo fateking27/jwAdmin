@@ -137,8 +137,7 @@
               @click="
                 () => {
                   const arr = row.achievementMaterialUrl?.split('?');
-                  handleUpdate({ ...row, achievementMaterialUrlArr: arr }),
-                    console.log({ ...row, achievementMaterialUrlArr: arr });
+                  handleUpdate({ ...row, achievementMaterialUrlArr: arr });
                 }
               "
               v-if="hasAuth(['system:dept:edit'])"
@@ -383,6 +382,7 @@ async function onSearch() {
 const getList = async () => {
   loading.value = true;
   const { rows, total } = await listCurrent(form);
+  // console.log(rows)
   dataList.value = rows;
   pagination.total = total;
   loading.value = false;

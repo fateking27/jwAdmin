@@ -122,7 +122,7 @@ const content = computed({
 const submitMaterial = () => {
   if (form.materialId) {
     const material = materialMap.get(form.materialId);
-    debugger
+    debugger;
     if (material) {
       if (material.type == "0") {
         editorRef.value.insertNode({
