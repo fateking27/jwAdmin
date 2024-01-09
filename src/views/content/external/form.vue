@@ -23,6 +23,10 @@
         <el-input v-model="form.url" placeholder="请输入链接" />
       </el-form-item>
 
+      <el-form-item label="来源" prop="source">
+        <el-input v-model="form.source" placeholder="请输入来源" />
+      </el-form-item>
+
       <el-form-item label="作者" prop="author">
         <el-input
           v-model="form.author"
