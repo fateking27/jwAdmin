@@ -31,7 +31,7 @@
     </el-descriptions>
     <div>
       <div>缩略图预览：</div>
-      <el-image :src="data.value.url" />
+      <el-image :src="`${VITE_API_PATH}/static/` + data.value.url" />
     </div>
     <template #footer>
       <span class="dialog-footer">
@@ -43,6 +43,9 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+
+const { VITE_API_PATH } = import.meta.env;
+
 const dialogVisible = ref(false);
 const data = ref();
 const showService = async row => {
