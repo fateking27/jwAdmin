@@ -125,7 +125,7 @@
 
 <script lang="ts" setup>
 import { FormInstance } from "element-plus";
-import { ref, reactive, toRefs } from "vue";
+import { ref, reactive, toRefs, computed } from "vue";
 import { message } from "@/utils/message";
 import { getFileInfo, uploadFile } from "@/api/wjx/file";
 import { addMaterial, updateMaterial } from "@/api/wjx/material";

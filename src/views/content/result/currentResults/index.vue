@@ -41,7 +41,7 @@
     </el-form>
 
     <PureTableBar
-      name="成果内容列表"
+      title="当前成果列表"
       :tableRef="tableRef?.getTableRef()"
       :columns="columns"
       @refresh="onSearch"

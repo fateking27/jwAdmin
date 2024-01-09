@@ -137,10 +137,6 @@ const content = computed({
 const submitMaterial = () => {
   if (form.materialId) {
     const material = materialMap.get(form.materialId);
-<<<<<<< HEAD
-=======
-    debugger;
->>>>>>> 35e413d3ab2b3c05d4a95460c9a3893b8c285da9
     if (material) {
       if (material.type == "0") {
         editorRef.value.insertNode({

@@ -33,7 +33,7 @@
     </el-form>
 
     <PureTableBar
-      name="对外服务列表"
+      title="对外服务列表"
       :tableRef="tableRef?.getTableRef()"
       :columns="columns"
       @refresh="onSearch"

@@ -44,7 +44,7 @@
     </el-form>
 
     <PureTableBar
-      name="门户及项目介绍列表"
+      title="门户及项目介绍列表"
       :tableRef="tableRef?.getTableRef()"
       :columns="columns"
       @refresh="onSearch"

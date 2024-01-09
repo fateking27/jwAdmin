@@ -33,7 +33,7 @@
     </el-form>
 
     <PureTableBar
-      title="阶段成果列表"
+      title="阶段展示列表"
       :tableRef="tableRef?.getTableRef()"
       :columns="columns"
       @refresh="onSearch"
