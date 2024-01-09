@@ -19,8 +19,26 @@
         <el-input v-model="form.type" placeholder="请输入类型" maxlength="10" />
       </el-form-item>
 
-      <el-form-item label="缩略图" prop="url">
+      <!-- <el-form-item label="缩略图" prop="url">
         <el-input v-model="form.url" placeholder="请输入链接" />
+      </el-form-item> -->
+
+      <el-form-item label="缩略图" prop="url">
+        <!-- 添加筛选 -->
+        <el-select filterable v-model="form.url" placeholder="请选择图片">
+          <el-option-group
+            v-for="group in options"
+            :key="group.name"
+            :label="group.name"
+          >
+            <el-option
+              v-for="item in group.list"
+              :key="item.id"
+              :label="item.title"
+              :value="item.url"
+            />
+          </el-option-group>
+        </el-select>
       </el-form-item>
 
       <el-form-item label="来源" prop="source">
@@ -68,7 +86,9 @@
 
 <script setup lang="ts">
 import { FormInstance } from "element-plus";
-import { ref, reactive, toRefs } from "vue";
+import { ref, reactive, toRefs, onMounted } from "vue";
+
+import { NewImg } from "@/api/content/new";
 import { message } from "@/utils/message";
 //import { handleTree } from "@pureadmin/utils";
 import {
@@ -78,6 +98,15 @@ import {
 } from "@/api/content/external";
 import { useDict } from "@/utils/useDict";
 //const { sys_normal_disable } = useDict("sys_normal_disable");
+
+let options = [];
+
+//获取素材图片
+const getNewImg = async () => {
+  const res = await NewImg();
+  console.log(res);
+  options = res.data;
+};
 
 const externalRef = ref();
 const loading = ref(false);
@@ -172,6 +201,10 @@ const setData = async row => {
     });
   }
 };
+
+onMounted(() => {
+  getNewImg();
+});
 
 defineExpose({ showDrawer, isUpdate, setData });
 </script>

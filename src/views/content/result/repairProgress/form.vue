@@ -71,11 +71,7 @@
       </el-form-item>
 
       <el-form-item label="内容" prop="content">
-<<<<<<< HEAD
-        <SuperEditor v-model:model-value="form.content" />
-=======
         <SuperEditor v-if="showDrawer" v-model:model-value="form.content" />
->>>>>>> 35e413d3ab2b3c05d4a95460c9a3893b8c285da9
       </el-form-item>
 
       <el-form-item style="margin-top: 20px; margin-left: -110px">
@@ -97,12 +93,8 @@ import { ref, reactive, toRefs, onMounted } from "vue";
 import { message } from "@/utils/message";
 import SuperEditor from "@/components/SuperEditor/index.vue";
 import { addProgress, updateResult, getResult } from "@/api/content/result";
-<<<<<<< HEAD
-import SuperEditor from "@/components/SuperEditor/index.vue";
-=======
 import { NewImg } from "@/api/content/new";
 
->>>>>>> 35e413d3ab2b3c05d4a95460c9a3893b8c285da9
 const resultRef = ref();
 const loading = ref(false);
 //const deptOptions = ref([]);
