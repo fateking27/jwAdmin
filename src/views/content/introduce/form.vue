@@ -104,7 +104,7 @@
       </el-form-item>
 
       <el-form-item label="文章内容" prop="content">
-        <SuperEditor v-if="showDrawer" v-model:model-value="form.content" />
+        <SuperEditor v-model:model-value="form.content" />
       </el-form-item>
 
       <el-form-item>
@@ -182,7 +182,7 @@ const getNewImg = async () => {
 };
 
 const handleDrawerClose = () => {
-  reset();
+  // reset();
   showDrawer.value = false;
 };
 

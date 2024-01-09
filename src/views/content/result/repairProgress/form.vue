@@ -3,7 +3,7 @@
     v-model="showDrawer"
     :title="!isUpdate ? '新增修复进度' : '编辑修复进度'"
     :before-close="handleDrawerClose"
-    size="520px"
+    size="1020px"
   >
     <el-form label-width="110px" ref="resultRef" :rules="rules" :model="form">
       <el-form-item label="标题" prop="title">
@@ -41,11 +41,7 @@
       </el-form-item>
 
       <el-form-item label="内容" prop="content">
-        <el-input
-          v-model="form.content"
-          placeholder="请输入内容"
-          type="textarea"
-        />
+        <SuperEditor v-model:model-value="form.content" />
       </el-form-item>
 
       <el-form-item>
@@ -67,7 +63,7 @@ import { ref, reactive, toRefs } from "vue";
 import { message } from "@/utils/message";
 
 import { addProgress, updateResult, getResult } from "@/api/content/result";
-
+import SuperEditor from "@/components/SuperEditor/index.vue";
 const resultRef = ref();
 const loading = ref(false);
 //const deptOptions = ref([]);
@@ -102,7 +98,7 @@ const reset = () => {
 const isUpdate = ref(false);
 
 const handleDrawerClose = () => {
-  reset();
+  // reset();
   showDrawer.value = false;
 };
 

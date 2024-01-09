@@ -13,6 +13,13 @@
           maxlength="60"
         />
       </el-form-item>
+      <el-form-item label="分类" prop="type">
+        <el-select v-model="form.type" disabled>
+          <el-option label="图片" value="0" />
+          <el-option label="视频" value="1" />
+          <el-option label="音频" value="2" />
+        </el-select>
+      </el-form-item>
 
       <el-form-item label="描述" prop="description">
         <el-input
@@ -70,7 +77,42 @@
           </el-icon>
         </el-upload>
       </el-form-item>
-
+      <el-form-item
+        label="图片尺寸"
+        prop="imageSize"
+        v-if="form.type && form.type == '0'"
+      >
+        <el-input
+          v-model="form.imageSize"
+          placeholder="请输入图片尺寸例如(23*34)"
+        />
+      </el-form-item>
+      <el-form-item
+        label="视频分辨率"
+        prop="videoSize"
+        v-if="form.type && form.type == '1'"
+      >
+        <el-input
+          v-model="form.videoSize"
+          placeholder="请输入视频分辨率例如(1023*512)"
+        />
+      </el-form-item>
+      <el-form-item
+        label="时长"
+        prop="time"
+        v-if="form.type && (form.type == '2' || form.type == '1')"
+      >
+        <el-input v-model="form.time" placeholder="请输入时长秒" />
+      </el-form-item>
+      <el-form-item label="存储位置" prop="url">
+        <el-input v-model="form.url" disabled />
+      </el-form-item>
+      <el-form-item label="状态" prop="state">
+        <el-select v-model="form.state" disabled>
+          <el-option label="被引用" value="1" />
+          <el-option label="未被引用" value="0" />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" :loading="loading" @click="onSubmit(newRef)"
           >提交
@@ -89,7 +131,7 @@ import { getFileInfo, uploadFile } from "@/api/wjx/file";
 import { addMaterial, updateMaterial } from "@/api/wjx/material";
 import { useDict } from "@/utils/useDict";
 import { Plus } from "@element-plus/icons-vue";
-import {cloneDeep} from "@pureadmin/utils";
+import { cloneDeep } from "@pureadmin/utils";
 
 const { VITE_API_PATH } = import.meta.env;
 const { sys_cover_status } = useDict("sys_cover_status");
@@ -123,7 +165,10 @@ const reset = () => {
     orderNo: 0,
     isShow: "1",
     imageUrl: undefined,
-    type: undefined
+    type: undefined,
+    imageSize: undefined,
+    videoSize: undefined,
+    time: undefined
   };
   fileList.value = [];
   if (newRef.value?.resetFields) {
@@ -227,8 +272,17 @@ const handleFileUpload = param => {
     });
 };
 
-// const imgUrl = ref("");
-const srcList = ref([]);
+const typeName = computed(() => {
+  if (form.value.type == "0") {
+    return "图片";
+  } else if (form.value.type == "1") {
+    return "视频";
+  } else if (form.value.type == "2") {
+    return "音频";
+  } else {
+    return "";
+  }
+});
 
 defineExpose({ showDrawer, isUpdate, setData });
 </script>

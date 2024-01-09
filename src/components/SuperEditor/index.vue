@@ -48,7 +48,14 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onUnmounted, reactive, ref } from "vue";
+import {
+  computed,
+  onBeforeMount,
+  onBeforeUnmount,
+  reactive,
+  ref,
+  shallowRef
+} from "vue";
 import "@wangeditor/editor/dist/css/style.css";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import { Boot, IDomEditor, IToolbarConfig } from "@wangeditor/editor";
@@ -56,7 +63,7 @@ import MaterialMenu from "@/components/SuperEditor/MaterialMenu";
 import { getMaterialTree } from "@/api/wjx/material";
 
 const { VITE_API_PATH } = import.meta.env;
-const editorRef = ref();
+const editorRef = shallowRef();
 const mode = ref("default");
 const materialDialogShow = ref(false);
 const form = reactive({
@@ -64,7 +71,11 @@ const form = reactive({
 });
 const options = ref([]);
 const toolbarConfig: Partial<IToolbarConfig> = {
-  excludeKeys: ["group-image", "group-video"]
+  excludeKeys: ["group-image", "group-video"],
+  insertKeys: {
+    index: 22,
+    keys: "MaterialMenu"
+  }
 };
 const editorConfig = { placeholder: "请输入内容..." };
 const handleCreated = async editor => {
@@ -73,22 +84,26 @@ const handleCreated = async editor => {
   await initMaterialTree();
   initMaterialMenuEvent();
 };
+onBeforeUnmount(() => {
+  const editor = editorRef.value;
+  if (editor) {
+    editor.destroy();
+  }
+});
 const registerMenu = (
   editor: IDomEditor,
   toolbarConfig: Partial<IToolbarConfig>
 ) => {
   //获取所有已注册的菜单
   const allRegisterMenu = editor.getAllMenuKeys();
-  Boot.registerMenu({
-    key: "MaterialMenu",
-    factory() {
-      return new MaterialMenu();
-    }
-  });
-  toolbarConfig.insertKeys = {
-    index: 22,
-    keys: ["MaterialMenu"]
-  };
+  if (!allRegisterMenu.includes("MaterialMenu")) {
+    Boot.registerMenu({
+      key: "MaterialMenu",
+      factory() {
+        return new MaterialMenu();
+      }
+    });
+  }
 };
 
 const materialMap = new Map();
@@ -122,7 +137,6 @@ const content = computed({
 const submitMaterial = () => {
   if (form.materialId) {
     const material = materialMap.get(form.materialId);
-    debugger
     if (material) {
       if (material.type == "0") {
         editorRef.value.insertNode({
