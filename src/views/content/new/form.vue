@@ -14,14 +14,6 @@
         />
       </el-form-item>
 
-      <el-form-item label="新闻摘要" prop="brief">
-        <el-input
-          v-model="form.brief"
-          placeholder="请输入新闻摘要"
-          maxlength="50"
-        />
-      </el-form-item>
-
       <el-form-item
         style="display: none"
         label="新闻封面Id"
@@ -63,11 +55,27 @@
         </el-select>
       </el-form-item>
 
+      <el-form-item label="来源" prop="source">
+        <el-input
+          v-model="form.source"
+          placeholder="请输入来源"
+          maxlength="50"
+        />
+      </el-form-item>
+
       <el-form-item label="新闻标签" prop="mark">
         <el-input
           v-model="form.mark"
           placeholder="请输入新闻标签"
           maxlength="10"
+        />
+      </el-form-item>
+
+      <el-form-item label="新闻摘要" prop="brief">
+        <el-input
+          v-model="form.brief"
+          placeholder="请输入新闻摘要"
+          maxlength="50"
         />
       </el-form-item>
 
@@ -91,6 +99,7 @@
       <el-form-item label="内容" prop="content">
         <SuperEditor v-model:model-value="form.content" />
       </el-form-item>
+
       <el-form-item style="margin-top: 20px; margin-left: -110px">
         <el-button type="primary" :loading="loading" @click="onSubmit(newRef)"
           >提交
@@ -103,9 +112,9 @@
 
 <script setup lang="ts">
 import { FormInstance } from "element-plus";
-import { ref, reactive, toRefs, shallowRef, onMounted } from "vue";
+import { ref, reactive, toRefs, onMounted } from "vue";
 import { message } from "@/utils/message";
-import { addNew, updateNew, getNew, NewImg } from "@/api/content/new";
+import { addNew, updateNew, NewImg } from "@/api/content/new";
 import { cloneDeep } from "@pureadmin/utils";
 import SuperEditor from "@/components/SuperEditor/index.vue";
 let options = [];
@@ -145,6 +154,7 @@ const reset = () => {
     mark: undefined,
     author: undefined,
     content: "",
+    source: undefined,
     releaseTime: undefined,
     release_status: undefined,
     coverMaterialId: "",

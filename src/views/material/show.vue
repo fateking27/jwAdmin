@@ -39,6 +39,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { Picture as IconPicture } from "@element-plus/icons-vue";
+
 const dialogVisible = ref(false);
 const data = ref();
 const showMaterial = async row => {
@@ -48,7 +49,7 @@ const showMaterial = async row => {
 };
 
 const handleClose = () => {
-  dialogVisible.value=false;
+  dialogVisible.value = false;
 };
 
 defineExpose({ showMaterial });

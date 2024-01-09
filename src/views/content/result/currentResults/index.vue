@@ -6,10 +6,18 @@
       :model="form"
       class="bg-bg_color w-[99/100] pl-8 pt-4"
     >
-      <el-form-item label="文章标题" prop="title">
+      <el-form-item label="分级" prop="rank">
         <el-input
-          v-model="form.title"
-          placeholder="请输入文章标题"
+          v-model="form.rank"
+          placeholder="请输入分级"
+          clearable
+          @keyup.enter="onSearch"
+        />
+      </el-form-item>
+      <el-form-item label="功能" prop="fun">
+        <el-input
+          v-model="form.fun"
+          placeholder="请输入功能"
           clearable
           @keyup.enter="onSearch"
         />
@@ -70,6 +78,8 @@
           :size="size"
           :data="dataList"
           :columns="dynamicColumns"
+          :pagination="pagination"
+          :paginationSmall="size === 'small'"
           :header-cell-style="{
             background: 'var(--el-table-row-hover-bg-color)',
             color: 'var(--el-text-color-primary)'
@@ -91,6 +101,7 @@
               @click="handlePublish(row)"
               :icon="useRenderIcon(Publish)"
               v-if="hasAuth(['system:dept:add'])"
+              :disabled="row.releaseStatus === '1'"
             >
               发布
             </el-button>
@@ -102,8 +113,20 @@
               @click="handleCancel(row)"
               :icon="useRenderIcon(Cancel)"
               v-if="hasAuth(['system:dept:add'])"
+              :disabled="row.releaseStatus === '0'"
             >
               撤销
+            </el-button>
+            <el-button
+              class="reset-margin"
+              link
+              type="primary"
+              :size="size"
+              @click="handleSee(row)"
+              :icon="useRenderIcon(View)"
+              v-if="hasAuth(['system:dept:add'])"
+            >
+              查看
             </el-button>
             <el-button
               class="reset-margin"
@@ -114,8 +137,7 @@
               @click="
                 () => {
                   const arr = row.achievementMaterialUrl?.split('?');
-                  handleUpdate({ ...row, achievementMaterialUrlArr: arr }),
-                    console.log({ ...row, achievementMaterialUrlArr: arr });
+                  handleUpdate({ ...row, achievementMaterialUrlArr: arr });
                 }
               "
               v-if="hasAuth(['system:dept:edit'])"
@@ -144,6 +166,7 @@
       </template>
     </PureTableBar>
     <Form ref="formRef" @reload="onSearch" />
+    <Show ref="showRef" />
   </div>
 </template>
 <script setup lang="ts">
@@ -158,22 +181,19 @@ import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
 import Publish from "@iconify-icons/ep/document";
 import Cancel from "@iconify-icons/ep/circle-close";
-import dayjs from "dayjs";
-import { handleTree } from "@/utils/tree";
-import { useDict } from "@/utils/useDict";
+import View from "@iconify-icons/ep/view";
 import Form from "./form.vue";
+import Show from "./show.vue";
 import { hasAuth } from "@/router/utils";
 import { message } from "@/utils/message";
 import {
   delResult,
   listCurrent,
   releaseResult,
-  updateResult
+  getResult
 } from "@/api/content/result";
-import { listPost } from "@/api/system/post";
 import { PaginationProps } from "@pureadmin/table";
 import { ElMessageBox } from "element-plus";
-import { delNew } from "@/api/content/new";
 
 defineOptions({
   name: "currentResults"
@@ -215,17 +235,17 @@ const columns: TableColumnList = [
   {
     label: "分级",
     prop: "rank",
-    minWidth: 120
+    minWidth: 100
   },
   {
     label: "功能",
-    prop: "disasterReduction",
-    minWidth: 120
+    prop: "fun",
+    minWidth: 100
   },
   {
     label: "现状",
     prop: "ecologicalStatus",
-    minWidth: 120
+    minWidth: 100
   },
 
   {
@@ -235,6 +255,25 @@ const columns: TableColumnList = [
   }
 ];
 
+const { VITE_API_PATH } = import.meta.env;
+const showRef = ref();
+
+const handleSee = async row => {
+  //先根据文件id查询文件详细信息
+  const res = await getResult(row.id);
+  row.value = res.data;
+  const urlArr = row.value.achievementMaterialUrl.split("?");
+  // 使用 map() 方法循环遍历数组中的每个地址
+  const newUrlArr = urlArr.map(url => {
+    // 使用模板字符串将地址拼接成与 row.value.coverMaterialUrl 类似的格式
+    return `${VITE_API_PATH}/static/${url}`;
+  });
+  // 将拼接后的地址存储在一个新的数组中
+  row.value.achievementMaterialUrl = newUrlArr;
+  console.log(row.value.achievementMaterialUrl);
+  await showRef.value.showCurrent(row);
+};
+
 const handleAdd = row => {
   formRef.value.isUpdate = false;
   formRef.value.setData();
@@ -242,7 +281,15 @@ const handleAdd = row => {
 };
 
 function handlePublish(row) {
-  row.release_status = 1;
+  // 判断是否已存在同类型文章已发布
+  const hasPublished = dataList.value.some(item => item.releaseStatus === "1");
+  if (hasPublished) {
+    message("该类型文章已经发布，不能重复发布", {
+      type: "warning"
+    });
+    return;
+  }
+  row.releaseStatus = 1;
   releaseResult(row.id).then(() => {
     message("发布成功", {
       type: "success"
@@ -252,7 +299,7 @@ function handlePublish(row) {
 }
 
 function handleCancel(row) {
-  row.release_status = 0;
+  row.releaseStatus = 0;
   releaseResult(row.id).then(() => {
     message("撤回成功", {
       type: "success"
@@ -262,7 +309,7 @@ function handleCancel(row) {
 }
 
 const handleUpdate = row => {
-  console.log(row);
+  // console.log(row);
   formRef.value.isUpdate = true;
   formRef.value.setData(row);
   formRef.value.showDrawer = true;
@@ -276,7 +323,7 @@ const handleSelectionChange = val => {
 const handleCurrentChange = (val: number) => {
   pagination.currentPage = val;
   form.pageNum = pagination.currentPage;
-  onSearch();
+  getList();
 };
 
 const handleSortChange = column => {
@@ -327,11 +374,19 @@ function resetForm(formEl) {
 }
 
 async function onSearch() {
-  loading.value = true;
-  const { rows } = await listCurrent(form);
-  dataList.value = rows;
-  loading.value = false;
+  pagination.currentPage = 1;
+  form.pageNum = pagination.currentPage;
+  getList();
 }
+
+const getList = async () => {
+  loading.value = true;
+  const { rows, total } = await listCurrent(form);
+  // console.log(rows)
+  dataList.value = rows;
+  pagination.total = total;
+  loading.value = false;
+};
 
 onMounted(() => {
   onSearch();

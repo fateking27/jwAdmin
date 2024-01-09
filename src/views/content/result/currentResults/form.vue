@@ -13,12 +13,8 @@
           maxlength="120"
         />
       </el-form-item>
-      <el-form-item label="功能" prop="disasterReduction">
-        <el-input
-          v-model="form.disasterReduction"
-          placeholder="请输入功能"
-          maxlength="120"
-        />
+      <el-form-item label="功能" prop="fun">
+        <el-input v-model="form.fun" placeholder="请输入功能" maxlength="120" />
       </el-form-item>
 
       <el-form-item label="现状" prop="ecologicalStatus">
@@ -87,7 +83,7 @@ let options = [];
 //获取素材图片
 const getNewImg = async () => {
   const res = await NewImg();
-  console.log(res);
+  // console.log(res);
   options = res.data;
 };
 
@@ -95,10 +91,8 @@ const data = reactive({
   form: {} as any,
   rules: {
     rank: [{ required: true, message: "分级不能为空", trigger: "blur" }],
-    disasterReduction: [
-      { required: true, message: "功能不能为空", trigger: "blur" }
-    ],
-    decologicalStatus: [
+    fun: [{ required: true, message: "功能不能为空", trigger: "blur" }],
+    ecologicalStatus: [
       { required: true, message: "现状不能为空", trigger: "blur" }
     ]
   }
@@ -117,9 +111,9 @@ const reset = () => {
     releaseTime: undefined,
     release_status: undefined,
     ecologicalStatus: undefined,
-    disasterReduction: undefined,
+    fun: undefined,
     rank: undefined,
-    achievementMaterialUrlArr: undefined
+    achievementMaterialUrlArr: []
   };
   if (resultRef.value?.resetFields) {
     resultRef.value.resetFields();
@@ -129,7 +123,7 @@ const reset = () => {
 const isUpdate = ref(false);
 
 const handleDrawerClose = () => {
-  reset();
+  // reset();
   showDrawer.value = false;
 };
 
@@ -175,15 +169,20 @@ const emit = defineEmits<{
 }>();
 
 const setData = async row => {
+  // console.log(row)
   reset();
   if (!row) {
     isUpdate.value = false;
   } else {
     isUpdate.value = true;
     const id = row.id;
-    getResult(id).then(response => {
-      form.value = response.data;
-    });
+    // getResult(id).then(response => {
+    //   form.value = response.data;
+    //   console.log(response.data)
+    // });
+
+    //当前成果表单回显
+    form.value = row;
   }
 };
 

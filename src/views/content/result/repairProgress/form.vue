@@ -10,8 +10,38 @@
         <el-input
           v-model="form.title"
           placeholder="请输入标题"
-          maxlength="20"
+          maxlength="40"
         />
+      </el-form-item>
+
+      <el-form-item
+        style="display: none"
+        label="文章封面Id"
+        prop="coverMaterialId"
+      >
+        <el-input v-model="form.coverMaterialId" placeholder="" />
+      </el-form-item>
+
+      <el-form-item label="文章封面" prop="coverMaterialUrl">
+        <!-- 添加筛选 -->
+        <el-select
+          filterable
+          v-model="form.coverMaterialUrl"
+          placeholder="请选择文章封面"
+        >
+          <el-option-group
+            v-for="group in options"
+            :key="group.name"
+            :label="group.name"
+          >
+            <el-option
+              v-for="item in group.list"
+              :key="item.id"
+              :label="item.title"
+              :value="item.url"
+            />
+          </el-option-group>
+        </el-select>
       </el-form-item>
 
       <el-form-item label="来源" prop="source">
@@ -41,10 +71,14 @@
       </el-form-item>
 
       <el-form-item label="内容" prop="content">
+<<<<<<< HEAD
         <SuperEditor v-model:model-value="form.content" />
+=======
+        <SuperEditor v-if="showDrawer" v-model:model-value="form.content" />
+>>>>>>> 35e413d3ab2b3c05d4a95460c9a3893b8c285da9
       </el-form-item>
 
-      <el-form-item>
+      <el-form-item style="margin-top: 20px; margin-left: -110px">
         <el-button
           type="primary"
           :loading="loading"
@@ -59,11 +93,16 @@
 
 <script setup lang="ts">
 import { FormInstance } from "element-plus";
-import { ref, reactive, toRefs } from "vue";
+import { ref, reactive, toRefs, onMounted } from "vue";
 import { message } from "@/utils/message";
-
-import { addProgress, updateResult, getResult } from "@/api/content/result";
 import SuperEditor from "@/components/SuperEditor/index.vue";
+import { addProgress, updateResult, getResult } from "@/api/content/result";
+<<<<<<< HEAD
+import SuperEditor from "@/components/SuperEditor/index.vue";
+=======
+import { NewImg } from "@/api/content/new";
+
+>>>>>>> 35e413d3ab2b3c05d4a95460c9a3893b8c285da9
 const resultRef = ref();
 const loading = ref(false);
 //const deptOptions = ref([]);
@@ -73,7 +112,10 @@ const data = reactive({
   form: {} as any,
   rules: {
     title: [{ required: true, message: "标题不能为空", trigger: "blur" }],
-    content: [{ required: true, message: "内容不能为空", trigger: "blur" }]
+    content: [{ required: true, message: "内容不能为空", trigger: "blur" }],
+    coverMaterialUrl: [
+      { required: true, message: "文章封面不能为空", trigger: "blur" }
+    ]
   }
 });
 
@@ -88,14 +130,23 @@ const reset = () => {
     content: undefined,
     source: undefined,
     releaseTime: undefined,
-    release_status: undefined
+    release_status: undefined,
+    coverMaterialUrl: undefined
   };
   if (resultRef.value?.resetFields) {
     resultRef.value.resetFields();
   }
 };
 
+let options = [];
 const isUpdate = ref(false);
+
+//获取封面图片
+const getNewImg = async () => {
+  const res = await NewImg();
+  console.log(res);
+  options = res.data;
+};
 
 const handleDrawerClose = () => {
   // reset();
@@ -155,6 +206,10 @@ const setData = async row => {
     });
   }
 };
+
+onMounted(() => {
+  getNewImg();
+});
 
 defineExpose({ showDrawer, isUpdate, setData });
 </script>

@@ -92,7 +92,7 @@
               @click="handlePublish(row)"
               :icon="useRenderIcon(Publish)"
               v-if="hasAuth(['system:dept:add'])"
-              :disabled="row.releaseStatus == '1'"
+              :disabled="row.releaseStatus === '1'"
             >
               发布
             </el-button>
@@ -104,9 +104,20 @@
               @click="handleCancel(row)"
               :icon="useRenderIcon(Cancel)"
               v-if="hasAuth(['system:dept:add'])"
-              :disabled="row.releaseStatus == '0'"
+              :disabled="row.releaseStatus === '0'"
             >
               撤销
+            </el-button>
+            <el-button
+              class="reset-margin"
+              link
+              type="primary"
+              :size="size"
+              @click="handleSee(row)"
+              :icon="useRenderIcon(View)"
+              v-if="hasAuth(['system:dept:add'])"
+            >
+              查看
             </el-button>
             <el-button
               class="reset-margin"
@@ -132,7 +143,7 @@
                   :size="size"
                   :icon="useRenderIcon(Delete)"
                 >
-                  批量删除
+                  删除
                 </el-button>
               </template>
             </el-popconfirm>
@@ -141,6 +152,7 @@
       </template>
     </PureTableBar>
     <Form ref="formRef" @reload="onSearch" />
+    <Show ref="showRef" />
   </div>
 </template>
 <script setup lang="ts">
@@ -155,21 +167,19 @@ import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
 import Publish from "@iconify-icons/ep/document";
 import Cancel from "@iconify-icons/ep/circle-close";
-import dayjs from "dayjs";
-import { handleTree } from "@/utils/tree";
-import { useDict } from "@/utils/useDict";
+import View from "@iconify-icons/ep/view";
 import Form from "./form.vue";
 import { hasAuth } from "@/router/utils";
 import { message } from "@/utils/message";
 import {
   delExternal,
   listExternal,
-  releaseExternal
+  releaseExternal,
+  getExternal
 } from "@/api/content/external";
 import { PaginationProps } from "@pureadmin/table";
 import { ElMessageBox } from "element-plus";
-import { delNew } from "@/api/content/new";
-import { delPortal } from "@/api/content/portal";
+import Show from "./show.vue";
 
 defineOptions({
   name: "external"
@@ -210,8 +220,7 @@ const columns: TableColumnList = [
   {
     label: "图层名称",
     prop: "title",
-    // align: "left",
-    minWidth: 120
+    minWidth: 100
   },
   {
     label: "投影类型",
@@ -236,15 +245,22 @@ const columns: TableColumnList = [
   {
     label: "发布时间",
     prop: "releaseTime",
-    width: 250
+    width: 200
   },
   {
     label: "操作",
     fixed: "right",
-    width: 330,
     slot: "operation"
   }
 ];
+
+const showRef = ref();
+const handleSee = async row => {
+  //先根据文件id查询文件详细信息
+  const res = await getExternal(row.id);
+  row.value = res.data;
+  await showRef.value.showService(row);
+};
 
 const handleAdd = row => {
   formRef.value.isUpdate = false;
@@ -253,7 +269,7 @@ const handleAdd = row => {
 };
 
 function handlePublish(row) {
-  row.release_status = 1;
+  row.releaseStatus = 1;
   releaseExternal(row.id).then(() => {
     message("发布成功", {
       type: "success"
@@ -263,7 +279,7 @@ function handlePublish(row) {
 }
 
 function handleCancel(row) {
-  row.release_status = 0;
+  row.releaseStatus = 0;
   releaseExternal(row.id).then(() => {
     message("撤回成功", {
       type: "success"

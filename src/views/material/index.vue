@@ -80,7 +80,7 @@
               link
               type="primary"
               :size="size"
-              :icon="useRenderIcon(EditPen)"
+              :icon="useRenderIcon(View)"
               @click="handleSee(row)"
               v-if="hasAuth(['system:dept:edit'])"
             >
@@ -116,8 +116,10 @@ import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { PureTableBar } from "@/components/RePureTableBar";
 import Search from "@iconify-icons/ep/search";
 import Refresh from "@iconify-icons/ep/refresh";
-
+import View from "@iconify-icons/ep/view";
 import AddFill from "@iconify-icons/ri/add-circle-line";
+import EditPen from "@iconify-icons/ep/edit-pen";
+import Delete from "@iconify-icons/ep/delete";
 import { onMounted, reactive, ref } from "vue";
 import { hasAuth } from "@/router/utils";
 import { message } from "@/utils/message";

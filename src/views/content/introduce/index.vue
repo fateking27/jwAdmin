@@ -104,6 +104,7 @@
               @click="handlePublish(row)"
               :icon="useRenderIcon(Publish)"
               v-if="hasAuth(['system:dept:add'])"
+              :disabled="row.releaseStatus === '1'"
             >
               发布
             </el-button>
@@ -115,8 +116,20 @@
               @click="handleCancel(row)"
               :icon="useRenderIcon(Cancel)"
               v-if="hasAuth(['system:dept:add'])"
+              :disabled="row.releaseStatus === '0'"
             >
               撤销
+            </el-button>
+            <el-button
+              class="reset-margin"
+              link
+              type="primary"
+              :size="size"
+              @click="handleSee(row)"
+              :icon="useRenderIcon(View)"
+              v-if="hasAuth(['system:dept:add'])"
+            >
+              查看
             </el-button>
             <el-button
               class="reset-margin"
@@ -151,6 +164,7 @@
       </template>
     </PureTableBar>
     <Form ref="formRef" @reload="getList" />
+    <Show ref="showRef" />
   </div>
 </template>
 <script setup lang="ts">
@@ -165,16 +179,19 @@ import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
 import Publish from "@iconify-icons/ep/document";
 import Cancel from "@iconify-icons/ep/circle-close";
-import dayjs from "dayjs";
-import { handleTree } from "@/utils/tree";
-import { useDict } from "@/utils/useDict";
+import View from "@iconify-icons/ep/view";
 import Form from "./form.vue";
 import { hasAuth } from "@/router/utils";
 import { message } from "@/utils/message";
-import { delPortal, listPortal, releasePortal } from "@/api/content/portal";
+import {
+  delPortal,
+  listPortal,
+  releasePortal,
+  getPortal
+} from "@/api/content/portal";
 import { PaginationProps } from "@pureadmin/table";
 import { ElMessageBox } from "element-plus";
-import { delNew, listNew } from "@/api/content/new";
+import Show from "./show.vue";
 
 defineOptions({
   name: "Portal"
@@ -254,10 +271,19 @@ const columns: TableColumnList = [
   {
     label: "操作",
     fixed: "right",
-    width: 330,
     slot: "operation"
   }
 ];
+
+const { VITE_API_PATH } = import.meta.env;
+const showRef = ref();
+const handleSee = async row => {
+  //先根据文件id查询文件详细信息
+  const res = await getPortal(row.id);
+  row.value = res.data;
+  row.value.coverMaterialUrl = `${VITE_API_PATH}/static/${res.data.coverMaterialUrl}`;
+  await showRef.value.showIntroduce(row);
+};
 
 const handleAdd = row => {
   formRef.value.isUpdate = false;
@@ -266,7 +292,17 @@ const handleAdd = row => {
 };
 
 function handlePublish(row) {
-  row.release_status = 1;
+  // 判断是否已存在同类型文章已发布
+  const hasPublished = dataList.value.some(
+    item => item.type === row.type && item.releaseStatus === "1"
+  );
+  if (hasPublished) {
+    message("同类型文章已经发布，不能重复发布", {
+      type: "warning"
+    });
+    return;
+  }
+  row.releaseStatus = 1;
   releasePortal(row.id).then(() => {
     message("发布成功", {
       type: "success"
@@ -276,7 +312,7 @@ function handlePublish(row) {
 }
 
 function handleCancel(row) {
-  row.release_status = 0;
+  row.releaseStatus = 0;
   releasePortal(row.id).then(() => {
     message("撤回成功", {
       type: "success"
@@ -309,7 +345,6 @@ const handleSortChange = column => {
 };
 
 const handleSizeChange = (val: number) => {
-  // console.log(`${val} items per page`);
   pagination.pageSize = val;
   form.pageSize = pagination.pageSize;
   onSearch();

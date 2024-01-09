@@ -70,6 +70,8 @@
           :size="size"
           :data="dataList"
           :columns="dynamicColumns"
+          :pagination="pagination"
+          :paginationSmall="size === 'small'"
           :header-cell-style="{
             background: 'var(--el-table-row-hover-bg-color)',
             color: 'var(--el-text-color-primary)'
@@ -91,6 +93,7 @@
               @click="handlePublish(row)"
               :icon="useRenderIcon(Publish)"
               v-if="hasAuth(['system:dept:add'])"
+              :disabled="row.releaseStatus === '1'"
             >
               发布
             </el-button>
@@ -102,8 +105,20 @@
               @click="handleCancel(row)"
               :icon="useRenderIcon(Cancel)"
               v-if="hasAuth(['system:dept:add'])"
+              :disabled="row.releaseStatus === '0'"
             >
               撤销
+            </el-button>
+            <el-button
+              class="reset-margin"
+              link
+              type="primary"
+              :size="size"
+              @click="handleSee(row)"
+              :icon="useRenderIcon(View)"
+              v-if="hasAuth(['system:dept:add'])"
+            >
+              查看
             </el-button>
             <el-button
               class="reset-margin"
@@ -138,11 +153,11 @@
       </template>
     </PureTableBar>
     <Form ref="formRef" @reload="onSearch" />
+    <Show ref="showRef" />
   </div>
 </template>
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
-
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import Delete from "@iconify-icons/ep/delete";
@@ -152,20 +167,20 @@ import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
 import Publish from "@iconify-icons/ep/document";
 import Cancel from "@iconify-icons/ep/circle-close";
-import dayjs from "dayjs";
-import { useDict } from "@/utils/useDict";
+import View from "@iconify-icons/ep/view";
 import Form from "./form.vue";
+import Show from "./show.vue";
 import { hasAuth } from "@/router/utils";
 import { message } from "@/utils/message";
 import {
   delResult,
   getResult,
   listProgress,
-  releaseResult,
-  updateResult
+  releaseResult
 } from "@/api/content/result";
 import { PaginationProps } from "@pureadmin/table";
 import { ElMessageBox } from "element-plus";
+import { getPortal } from "@/api/content/portal";
 
 defineOptions({
   name: "repairProgress"
@@ -234,6 +249,16 @@ const columns: TableColumnList = [
   }
 ];
 
+const { VITE_API_PATH } = import.meta.env;
+const showRef = ref();
+const handleSee = async row => {
+  //先根据文件id查询文件详细信息
+  const res = await getResult(row.id);
+  row.value = res.data;
+  row.value.coverMaterialUrl = `${VITE_API_PATH}/static/${res.data.coverMaterialUrl}`;
+  await showRef.value.showProgress(row);
+};
+
 const handleAdd = row => {
   formRef.value.isUpdate = false;
   formRef.value.setData();
@@ -241,22 +266,32 @@ const handleAdd = row => {
 };
 
 function handlePublish(row) {
-  row.release_status = 1;
+  // 判断是否已存在同类型文章已发布
+  const hasPublished = dataList.value.some(
+    item => item.type === row.type && item.releaseStatus === "1"
+  );
+  if (hasPublished) {
+    message("该类型文章已经发布，不能重复发布", {
+      type: "warning"
+    });
+    return;
+  }
+  row.releaseStatus = 1;
   releaseResult(row.id).then(() => {
     message("发布成功", {
       type: "success"
     });
-    onSearch();
+    getList();
   });
 }
 
 function handleCancel(row) {
-  row.release_status = 0;
+  row.releaseStatus = 0;
   releaseResult(row.id).then(() => {
     message("撤回成功", {
       type: "success"
     });
-    onSearch();
+    getList();
   });
 }
 
@@ -325,11 +360,18 @@ function resetForm(formEl) {
 }
 
 async function onSearch() {
-  loading.value = true;
-  const { rows } = await listProgress(form);
-  dataList.value = rows;
-  loading.value = false;
+  pagination.currentPage = 1;
+  form.pageNum = pagination.currentPage;
+  getList();
 }
+
+const getList = async () => {
+  loading.value = true;
+  const { rows, total } = await listProgress(form);
+  dataList.value = rows;
+  pagination.total = total;
+  loading.value = false;
+};
 
 onMounted(() => {
   onSearch();
