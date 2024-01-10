@@ -250,6 +250,7 @@ const columns: TableColumnList = [
   {
     label: "操作",
     fixed: "right",
+    width: 350,
     slot: "operation"
   }
 ];

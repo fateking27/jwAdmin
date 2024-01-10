@@ -197,8 +197,6 @@ defineOptions({
   name: "Portal"
 });
 
-//const { sys_normal_disable } = useDict("sys_normal_disable");
-
 const searchFormRef = ref();
 const tableRef = ref();
 const formRef = ref();
@@ -271,17 +269,17 @@ const columns: TableColumnList = [
   {
     label: "操作",
     fixed: "right",
+    width: 330,
     slot: "operation"
   }
 ];
 
-const { VITE_API_PATH } = import.meta.env;
 const showRef = ref();
 const handleSee = async row => {
   //先根据文件id查询文件详细信息
   const res = await getPortal(row.id);
   row.value = res.data;
-  row.value.coverMaterialUrl = `${VITE_API_PATH}/static/${res.data.coverMaterialUrl}`;
+
   await showRef.value.showIntroduce(row);
 };
 
