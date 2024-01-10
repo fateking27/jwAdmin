@@ -116,7 +116,7 @@
             <div
               id="titleChart"
               ref="titleChart"
-              style="width: 500px; height: 655px"
+              style="width: 28vw; height: 68vh"
             />
           </el-card>
         </div>
@@ -662,7 +662,8 @@ function titleChart() {
       }
     ],
     label: {
-      formatter: "{b}：{d}%"
+      formatter: "{b}\n{d}%"
+      // padding: [10, -65,0,0]
     },
     graphic: {
       type: "text",
