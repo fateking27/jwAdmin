@@ -247,6 +247,11 @@ const columns: TableColumnList = [
     prop: "ecologicalStatus",
     minWidth: 100
   },
+  {
+    label: "模块",
+    prop: "module",
+    minWidth: 100
+  },
 
   {
     label: "操作",
@@ -282,14 +287,14 @@ const handleAdd = row => {
 
 function handlePublish(row) {
   // 判断是否已存在同类型文章已发布
-  const hasPublished = dataList.value.some(item => item.releaseStatus === "1");
-  if (hasPublished) {
-    message("该类型文章已经发布，不能重复发布", {
-      type: "warning"
-    });
-    return;
-  }
-  row.releaseStatus = 1;
+  // const hasPublished = dataList.value.some(item => item.releaseStatus === "1");
+  // if (hasPublished) {
+  //   message("该类型文章已经发布，不能重复发布", {
+  //     type: "warning"
+  //   });
+  //   return;
+  // }
+  // row.releaseStatus = 1;
   releaseResult(row.id).then(() => {
     message("发布成功", {
       type: "success"

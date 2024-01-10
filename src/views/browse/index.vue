@@ -1,5 +1,5 @@
 <template>
-  <div class="main">
+  <div class="main" style="height: 80vh">
     <el-form
       ref="searchFormRef"
       :inline="true"
@@ -38,9 +38,9 @@
 
     <el-tabs
       type="border-card"
-      style="height: 770px; background-color: rgb(255 255 255)"
+      style="height: 100%; background-color: rgb(255 255 255)"
     >
-      <el-tab-pane label="表格">
+      <el-tab-pane label="表格" style="height: 100%">
         <PureTableBar
           title="文章列表"
           :tableRef="tableRef?.getTableRef()"
@@ -69,17 +69,32 @@
         </PureTableBar>
       </el-tab-pane>
 
-      <el-tab-pane label="图表">
+      <el-tab-pane label="图表" style="height: 100%">
         <div
-          style="display: flex; justify-content: space-evenly; width: 1630px"
+          style="
+            display: flex;
+            justify-content: space-evenly;
+            width: 100%;
+            height: 100%;
+          "
         >
-          <el-card class="box-card">
+          <el-card
+            class="box-card"
+            :style="[
+              {
+                width: width,
+                height: height,
+                display: 'flex',
+                justifyContent: 'center'
+              }
+            ]"
+          >
             <div
               id="chart"
               ref="chart"
               :style="[
                 {
-                  width: width,
+                  width: '50vw',
                   height: height,
                   display: 'flex',
                   justifyContent: 'center'
@@ -91,6 +106,8 @@
             class="box-card"
             :style="[
               {
+                width: '35%',
+                height: '73vh',
                 display: styleDisplay,
                 'align-items': styleAlignItems
               }
@@ -132,8 +149,8 @@ const styleTitleChart = reactive({
 
 const styleDisplay = ref("flex");
 const styleAlignItems = ref("center");
-const width = ref("900px");
-const height = ref("655px");
+const width = ref("50vw");
+const height = ref("73vh");
 
 const dateRange = ref();
 
@@ -460,7 +477,7 @@ function renderChart() {
     series: {
       type: "bar",
       id: "sales",
-      barWidth: 35,
+      barWidth: "35%",
       silent: false,
       data: newData as DataItem[],
       universalTransition: {
@@ -486,9 +503,7 @@ function renderChart() {
       ? (styleDisplay.value = "flex")
       : (styleDisplay.value = "none");
 
-    width.value == "1400px"
-      ? (width.value = "900px")
-      : (width.value = "1400px");
+    width.value == "70vw" ? (width.value = "50vw") : (width.value = "70vw");
 
     if (event.data) {
       const subData = drilldownData.find(function (data) {
@@ -538,7 +553,7 @@ function renderChart() {
         series: {
           type: "bar",
           id: "sales",
-          barWidth: 30,
+          barWidth: "35%",
           silent: true,
           dataGroupId: subData.dataGroupId,
           label: {
@@ -591,12 +606,14 @@ function renderChart() {
   });
 
   option && myChart.setOption(option);
+  window.addEventListener("resize", function () {
+    myChart.resize();
+  });
 }
 
 function titleChart() {
   const chart = document.getElementById("titleChart");
   const titleChart = echarts.init(chart);
-  // console.log(dataList.value)
 
   const arr = dataList.value.map(({ articleType, viewCount }) => ({
     articleType,
@@ -609,7 +626,7 @@ function titleChart() {
     };
   });
 
-  console.log(data);
+  // console.log(data);
 
   const options = {
     title: {
@@ -639,8 +656,8 @@ function titleChart() {
           }
         },
         labelLine: {
-          length: 25, // 修改引导线第一段的长度
-          length2: 25 // 修改引导线第二段的长度
+          length: "5%", // 修改引导线第一段的长度
+          length2: "7%" // 修改引导线第二段的长度
         }
       }
     ],
@@ -664,6 +681,10 @@ function titleChart() {
   options.graphic.style.text += total;
 
   options && titleChart.setOption(options);
+  // window.onresize = titleChart.resize;
+  window.addEventListener("resize", function () {
+    titleChart.resize();
+  });
 }
 
 onMounted(() => {
