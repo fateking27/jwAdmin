@@ -82,7 +82,7 @@
       </el-form-item>
 
       <el-form-item label="内容" prop="content">
-        <!--        <SuperEditor v-model:model-value="form.content" />-->
+        <!-- <SuperEditor v-model:model-value="form.content" /> -->
         <SuperEditor v-if="showDrawer" v-model:model-value="form.content" />
       </el-form-item>
 
