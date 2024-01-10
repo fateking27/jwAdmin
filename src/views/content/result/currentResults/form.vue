@@ -13,6 +13,7 @@
           maxlength="120"
         />
       </el-form-item>
+
       <el-form-item label="功能" prop="fun">
         <el-input v-model="form.fun" placeholder="请输入功能" maxlength="120" />
       </el-form-item>
@@ -23,6 +24,26 @@
           placeholder="请输入现状"
           maxlength="120"
         />
+      </el-form-item>
+
+      <el-form-item label="模块" prop="module">
+        <!-- <el-input
+          v-model="form.module"
+          placeholder="请输入模块"
+          maxlength="120"
+        /> -->
+        <el-select
+          filterable
+          clearable
+          v-model="form.module"
+          placeholder="请选择模块"
+        >
+          <el-option label="红树林-盐沼" value="红树林-盐沼" />
+          <el-option label="入海污染物" value="入海污染物" />
+          <el-option label="仿岩质潮间带" value="仿岩质潮间带" />
+          <el-option label="海岸带生态" value="海岸带生态" />
+          <el-option label="海洋防灾减灾" value="海洋防灾减灾" />
+        </el-select>
       </el-form-item>
 
       <el-form-item label="图片选择" prop="achievementMaterialUrlArr">
@@ -113,6 +134,7 @@ const reset = () => {
     ecologicalStatus: undefined,
     fun: undefined,
     rank: undefined,
+    module: undefined,
     achievementMaterialUrlArr: []
   };
   if (resultRef.value?.resetFields) {
