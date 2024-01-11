@@ -19,6 +19,11 @@
           {{ data.value.fun }}
         </el-text>
       </el-form-item>
+      <el-form-item label="模块">
+        <el-text class="textBorder">
+          {{ data.value.module }}
+        </el-text>
+      </el-form-item>
       <el-form-item label="成果图片">
         <el-image
           v-for="(item, index) of data.value.achievementMaterialUrl"
