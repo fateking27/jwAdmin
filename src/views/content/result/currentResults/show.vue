@@ -37,8 +37,8 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from "vue";
-const { VITE_API_PATH } = import.meta.env;
+import { ref } from "vue";
+// const { VITE_API_PATH } = import.meta.env;
 const dialogVisible = ref(false);
 const data = ref();
 
