@@ -183,7 +183,6 @@ import Publish from "@iconify-icons/ep/document";
 import Cancel from "@iconify-icons/ep/circle-close";
 import View from "@iconify-icons/ep/view";
 import Form from "./form.vue";
-import Show from "./show.vue";
 import { hasAuth } from "@/router/utils";
 import { message } from "@/utils/message";
 import {
