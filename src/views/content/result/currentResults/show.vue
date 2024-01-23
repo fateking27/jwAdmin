@@ -45,7 +45,6 @@ const data = ref();
 const showCurrent = async row => {
   data.value = row;
   dialogVisible.value = true;
-  console.log(data.value.achievementMaterialUrl);
 };
 
 const handleClose = () => {
